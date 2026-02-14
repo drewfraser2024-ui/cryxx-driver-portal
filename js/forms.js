@@ -13,6 +13,8 @@ const Forms = {
     const form = document.getElementById('vacation-form');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true);
       try {
         await DB.insert('vacation_requests', {
           user_id: Auth.getUserId(),
@@ -25,10 +27,13 @@ const Forms = {
           status: 'pending'
         });
         form.reset();
+        showFormSuccess(form, 'Request submitted!');
         showToast('Vacation request submitted!', 'success');
         this.loadVacationHistory();
       } catch (err) {
         showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
       }
     });
     this.loadVacationHistory();
@@ -39,7 +44,7 @@ const Forms = {
     try {
       const data = await DB.select('vacation_requests', { user_id: Auth.getUserId() });
       if (data.length === 0) {
-        container.innerHTML = '<p class="empty-state">No requests yet</p>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9992;</div><p>No requests yet</p></div>';
         return;
       }
       container.innerHTML = data.map(item => `
@@ -53,7 +58,7 @@ const Forms = {
         </div>
       `).join('');
     } catch (err) {
-      container.innerHTML = '<p class="empty-state">Error loading history</p>';
+      container.innerHTML = '<div class="empty-state">Error loading history</div>';
     }
   },
 
@@ -62,6 +67,8 @@ const Forms = {
     const form = document.getElementById('contact-form');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true);
       try {
         await DB.insert('contact_messages', {
           user_id: Auth.getUserId(),
@@ -73,10 +80,13 @@ const Forms = {
           status: 'pending'
         });
         form.reset();
+        showFormSuccess(form, 'Message sent!');
         showToast('Message sent to owner!', 'success');
         this.loadContactHistory();
       } catch (err) {
         showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
       }
     });
     this.loadContactHistory();
@@ -87,7 +97,7 @@ const Forms = {
     try {
       const data = await DB.select('contact_messages', { user_id: Auth.getUserId() });
       if (data.length === 0) {
-        container.innerHTML = '<p class="empty-state">No messages sent yet</p>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9993;</div><p>No messages sent yet</p></div>';
         return;
       }
       container.innerHTML = data.map(item => `
@@ -101,7 +111,7 @@ const Forms = {
         </div>
       `).join('');
     } catch (err) {
-      container.innerHTML = '<p class="empty-state">Error loading messages</p>';
+      container.innerHTML = '<div class="empty-state">Error loading messages</div>';
     }
   },
 
@@ -110,6 +120,8 @@ const Forms = {
     const form = document.getElementById('payroll-form');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true);
       try {
         await DB.insert('payroll_issues', {
           user_id: Auth.getUserId(),
@@ -122,10 +134,13 @@ const Forms = {
           status: 'pending'
         });
         form.reset();
+        showFormSuccess(form, 'Issue submitted!');
         showToast('Payroll issue submitted!', 'success');
         this.loadPayrollHistory();
       } catch (err) {
         showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
       }
     });
     this.loadPayrollHistory();
@@ -136,7 +151,7 @@ const Forms = {
     try {
       const data = await DB.select('payroll_issues', { user_id: Auth.getUserId() });
       if (data.length === 0) {
-        container.innerHTML = '<p class="empty-state">No payroll issues submitted</p>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#36;</div><p>No payroll issues submitted</p></div>';
         return;
       }
       container.innerHTML = data.map(item => `
@@ -151,7 +166,7 @@ const Forms = {
         </div>
       `).join('');
     } catch (err) {
-      container.innerHTML = '<p class="empty-state">Error loading history</p>';
+      container.innerHTML = '<div class="empty-state">Error loading history</div>';
     }
   },
 
@@ -168,6 +183,8 @@ const Forms = {
         return;
       }
 
+      const btn = form.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true);
       try {
         await DB.insert('uniform_requests', {
           user_id: Auth.getUserId(),
@@ -180,10 +197,13 @@ const Forms = {
           status: 'pending'
         });
         form.reset();
+        showFormSuccess(form, 'Request submitted!');
         showToast('Uniform request submitted!', 'success');
         this.loadUniformHistory();
       } catch (err) {
         showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
       }
     });
     this.loadUniformHistory();
@@ -194,7 +214,7 @@ const Forms = {
     try {
       const data = await DB.select('uniform_requests', { user_id: Auth.getUserId() });
       if (data.length === 0) {
-        container.innerHTML = '<p class="empty-state">No uniform requests yet</p>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128085;</div><p>No uniform requests yet</p></div>';
         return;
       }
       container.innerHTML = data.map(item => `
@@ -209,7 +229,7 @@ const Forms = {
         </div>
       `).join('');
     } catch (err) {
-      container.innerHTML = '<p class="empty-state">Error loading history</p>';
+      container.innerHTML = '<div class="empty-state">Error loading history</div>';
     }
   },
 
@@ -218,6 +238,8 @@ const Forms = {
     const form = document.getElementById('loading-form');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true);
       try {
         await DB.insert('loading_suggestions', {
           user_id: Auth.getUserId(),
@@ -229,10 +251,13 @@ const Forms = {
           status: 'pending'
         });
         form.reset();
+        showFormSuccess(form, 'Suggestion submitted!');
         showToast('Loading suggestion submitted!', 'success');
         this.loadLoadingHistory();
       } catch (err) {
         showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
       }
     });
     this.loadLoadingHistory();
@@ -243,7 +268,7 @@ const Forms = {
     try {
       const data = await DB.select('loading_suggestions', { user_id: Auth.getUserId() });
       if (data.length === 0) {
-        container.innerHTML = '<p class="empty-state">No suggestions submitted yet</p>';
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128666;</div><p>No suggestions submitted yet</p></div>';
         return;
       }
       container.innerHTML = data.map(item => `
@@ -257,7 +282,7 @@ const Forms = {
         </div>
       `).join('');
     } catch (err) {
-      container.innerHTML = '<p class="empty-state">Error loading history</p>';
+      container.innerHTML = '<div class="empty-state">Error loading history</div>';
     }
   },
 
@@ -268,6 +293,50 @@ const Forms = {
     this.loadPayrollHistory();
     this.loadUniformHistory();
     this.loadLoadingHistory();
+  }
+};
+
+// ===== Dashboard Module =====
+const Dashboard = {
+  updateGreeting() {
+    const el = document.getElementById('greeting-time');
+    if (!el) return;
+    const hour = new Date().getHours();
+    let greeting, icon;
+    if (hour < 12) {
+      greeting = 'Good morning';
+      icon = '&#9728;';
+    } else if (hour < 17) {
+      greeting = 'Good afternoon';
+      icon = '&#9788;';
+    } else {
+      greeting = 'Good evening';
+      icon = '&#9790;';
+    }
+    el.innerHTML = `${icon} ${greeting}`;
+  },
+
+  async loadPendingCounts() {
+    const tables = {
+      vacation: 'vacation_requests',
+      contact: 'contact_messages',
+      payroll: 'payroll_issues',
+      uniforms: 'uniform_requests',
+      loading: 'loading_suggestions'
+    };
+
+    for (const [key, table] of Object.entries(tables)) {
+      const badge = document.getElementById(`dash-badge-${key}`);
+      if (!badge) continue;
+      try {
+        const data = await DB.select(table, { user_id: Auth.getUserId() });
+        const pending = data.filter(item => item.status === 'pending').length;
+        badge.textContent = `${pending} pending`;
+        badge.classList.toggle('zero', pending === 0);
+      } catch (err) {
+        // Silently ignore
+      }
+    }
   }
 };
 
@@ -304,9 +373,51 @@ function escapeHtml(str) {
 function showToast(message, type = '') {
   const toast = document.getElementById('toast');
   const msg = document.getElementById('toast-message');
+  const icon = document.getElementById('toast-icon');
   msg.textContent = message;
+
+  if (type === 'success') {
+    icon.innerHTML = '&#10003;';
+  } else if (type === 'error') {
+    icon.innerHTML = '&#10007;';
+  } else {
+    icon.innerHTML = '&#8505;';
+  }
+
   toast.className = 'toast show ' + type;
   setTimeout(() => {
     toast.className = 'toast hidden';
   }, 3000);
+}
+
+function setButtonLoading(btn, loading) {
+  if (loading) {
+    btn.classList.add('loading');
+  } else {
+    btn.classList.remove('loading');
+  }
+}
+
+function showFormSuccess(form, message) {
+  const card = form.closest('.card');
+  if (!card) return;
+  card.style.position = 'relative';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'form-success-overlay';
+  overlay.innerHTML = `
+    <div class="check-circle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <p>${escapeHtml(message)}</p>
+  `;
+  card.appendChild(overlay);
+
+  setTimeout(() => {
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.3s';
+    setTimeout(() => overlay.remove(), 300);
+  }, 1500);
 }

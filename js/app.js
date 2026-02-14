@@ -37,13 +37,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     e.preventDefault();
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
+    const btn = loginForm.querySelector('button[type="submit"]');
 
+    setButtonLoading(btn, true);
     try {
       await Auth.login(email, password);
       showMainApp();
       showToast('Welcome back, ' + Auth.getUserName() + '!', 'success');
     } catch (err) {
       showToast(err.message, 'error');
+    } finally {
+      setButtonLoading(btn, false);
     }
   });
 
@@ -54,13 +58,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
     const role = document.getElementById('reg-role').value;
+    const btn = registerForm.querySelector('button[type="submit"]');
 
+    setButtonLoading(btn, true);
     try {
       await Auth.register(name, email, password, role);
       showMainApp();
       showToast('Account created! Welcome, ' + Auth.getUserName() + '!', 'success');
     } catch (err) {
       showToast(err.message, 'error');
+    } finally {
+      setButtonLoading(btn, false);
     }
   });
 
@@ -114,6 +122,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     Forms.init();
     Admin.init();
     Schedule.init();
+
+    // Dashboard greeting and counts
+    Dashboard.updateGreeting();
+    Dashboard.loadPendingCounts();
 
     // Navigate to dashboard
     Router.navigate('dashboard');

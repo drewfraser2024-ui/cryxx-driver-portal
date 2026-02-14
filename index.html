@@ -26,7 +26,7 @@
             <label for="login-password">Password</label>
             <input type="password" id="login-password" required placeholder="Password">
           </div>
-          <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+          <button type="submit" class="btn btn-primary btn-full"><span class="btn-text">Sign In</span></button>
           <p class="auth-toggle">Don't have an account? <a href="#" id="show-register">Register</a></p>
         </form>
         <form id="register-form" class="auth-form hidden">
@@ -50,7 +50,7 @@
               <option value="admin">Admin / Owner</option>
             </select>
           </div>
-          <button type="submit" class="btn btn-primary btn-full">Register</button>
+          <button type="submit" class="btn btn-primary btn-full"><span class="btn-text">Register</span></button>
           <p class="auth-toggle">Already have an account? <a href="#" id="show-login">Sign In</a></p>
         </form>
       </div>
@@ -111,45 +111,76 @@
         <!-- Dashboard Page -->
         <div id="page-dashboard" class="page active">
           <div class="page-header">
+            <div class="dashboard-greeting">
+              <span id="greeting-time" class="greeting-time"></span>
+            </div>
             <h1>Welcome back, <span id="dashboard-name">Driver</span></h1>
-            <p class="subtitle">Here's your quick overview</p>
+            <p class="subtitle">What would you like to do today?</p>
           </div>
           <div class="dashboard-grid">
             <div class="dash-card" data-goto="vacation">
-              <div class="dash-icon">&#9992;</div>
+              <div class="dash-card-top">
+                <div class="dash-icon">&#9992;</div>
+                <span id="dash-badge-vacation" class="dash-badge zero">0 pending</span>
+              </div>
               <h3>Days Off / Vacation</h3>
               <p>Request time off or vacation days</p>
+              <span class="dash-arrow">&#8594;</span>
             </div>
             <div class="dash-card" data-goto="contact">
-              <div class="dash-icon">&#9993;</div>
+              <div class="dash-card-top">
+                <div class="dash-icon">&#9993;</div>
+                <span id="dash-badge-contact" class="dash-badge zero">0 pending</span>
+              </div>
               <h3>Contact Owner</h3>
               <p>Reach out about any issues</p>
+              <span class="dash-arrow">&#8594;</span>
             </div>
             <div class="dash-card" data-goto="payroll">
-              <div class="dash-icon">&#36;</div>
+              <div class="dash-card-top">
+                <div class="dash-icon">&#36;</div>
+                <span id="dash-badge-payroll" class="dash-badge zero">0 pending</span>
+              </div>
               <h3>Payroll Issues</h3>
               <p>Report payroll discrepancies</p>
+              <span class="dash-arrow">&#8594;</span>
             </div>
             <div class="dash-card" data-goto="schedule">
-              <div class="dash-icon">&#128197;</div>
+              <div class="dash-card-top">
+                <div class="dash-icon">&#128197;</div>
+              </div>
               <h3>Driver Schedule</h3>
               <p>View your weekly schedule</p>
+              <span class="dash-arrow">&#8594;</span>
             </div>
             <div class="dash-card" data-goto="uniforms">
-              <div class="dash-icon">&#128085;</div>
+              <div class="dash-card-top">
+                <div class="dash-icon">&#128085;</div>
+                <span id="dash-badge-uniforms" class="dash-badge zero">0 pending</span>
+              </div>
               <h3>Uniform Request</h3>
               <p>Order new uniform items</p>
+              <span class="dash-arrow">&#8594;</span>
             </div>
             <div class="dash-card" data-goto="loading">
-              <div class="dash-icon">&#128666;</div>
+              <div class="dash-card-top">
+                <div class="dash-icon">&#128666;</div>
+                <span id="dash-badge-loading" class="dash-badge zero">0 pending</span>
+              </div>
               <h3>Truck Loading</h3>
               <p>Suggest how to load your truck</p>
+              <span class="dash-arrow">&#8594;</span>
             </div>
           </div>
         </div>
 
         <!-- Vacation Request Page -->
         <div id="page-vacation" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Days Off / Vacation</span>
+          </div>
           <div class="page-header">
             <h1>Days Off / Vacation Request</h1>
             <p class="subtitle">Submit your time-off request below</p>
@@ -189,7 +220,7 @@
                 <label for="vac-reason">Reason / Notes</label>
                 <textarea id="vac-reason" rows="4" placeholder="Optional: provide a reason or additional details"></textarea>
               </div>
-              <button type="submit" class="btn btn-primary">Submit Request</button>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Submit Request</span></button>
             </form>
           </div>
           <div class="card mt-4">
@@ -202,6 +233,11 @@
 
         <!-- Contact Owner Page -->
         <div id="page-contact" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Contact Owner</span>
+          </div>
           <div class="page-header">
             <h1>Contact Owner</h1>
             <p class="subtitle">Send a message to the company owner</p>
@@ -236,7 +272,7 @@
                   <option value="high">High</option>
                 </select>
               </div>
-              <button type="submit" class="btn btn-primary">Send Message</button>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Send Message</span></button>
             </form>
           </div>
           <div class="card mt-4">
@@ -249,6 +285,11 @@
 
         <!-- Payroll Issues Page -->
         <div id="page-payroll" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Payroll Issues</span>
+          </div>
           <div class="page-header">
             <h1>Payroll Issues</h1>
             <p class="subtitle">Report any payroll discrepancies or questions</p>
@@ -286,7 +327,7 @@
                 <label for="pay-details">Description of Issue</label>
                 <textarea id="pay-details" rows="5" required placeholder="Please describe the payroll issue in detail..."></textarea>
               </div>
-              <button type="submit" class="btn btn-primary">Submit Issue</button>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Submit Issue</span></button>
             </form>
           </div>
           <div class="card mt-4">
@@ -299,6 +340,11 @@
 
         <!-- Driver Schedule Page -->
         <div id="page-schedule" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Driver Schedule</span>
+          </div>
           <div class="page-header">
             <h1>Driver Schedule</h1>
             <p class="subtitle">View and manage your weekly schedule</p>
@@ -340,13 +386,18 @@
                 <label for="sched-route">Route / Notes</label>
                 <input type="text" id="sched-route" placeholder="e.g. Route 12 - Downtown">
               </div>
-              <button type="submit" class="btn btn-primary">Add Schedule Entry</button>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Add Schedule Entry</span></button>
             </form>
           </div>
         </div>
 
         <!-- Uniform Request Page -->
         <div id="page-uniforms" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Uniform Request</span>
+          </div>
           <div class="page-header">
             <h1>Uniform Request</h1>
             <p class="subtitle">Order new uniform items</p>
@@ -408,7 +459,7 @@
                 <label for="uni-notes">Additional Notes</label>
                 <textarea id="uni-notes" rows="3" placeholder="Any special requirements or preferences..."></textarea>
               </div>
-              <button type="submit" class="btn btn-primary">Submit Request</button>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Submit Request</span></button>
             </form>
           </div>
           <div class="card mt-4">
@@ -421,6 +472,11 @@
 
         <!-- Truck Loading Suggestions Page -->
         <div id="page-loading" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Truck Loading</span>
+          </div>
           <div class="page-header">
             <h1>Truck Loading Suggestions</h1>
             <p class="subtitle">Share how you'd like your truck loaded</p>
@@ -452,7 +508,7 @@
                   <option value="urgent">Urgent Change Needed</option>
                 </select>
               </div>
-              <button type="submit" class="btn btn-primary">Submit Suggestion</button>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Submit Suggestion</span></button>
             </form>
           </div>
           <div class="card mt-4">
@@ -465,6 +521,11 @@
 
         <!-- Admin Dashboard Page -->
         <div id="page-admin" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Admin Dashboard</span>
+          </div>
           <div class="page-header">
             <h1>Admin Dashboard</h1>
             <p class="subtitle">Review all driver submissions</p>
@@ -509,6 +570,7 @@
 
     <!-- Toast Notification -->
     <div id="toast" class="toast hidden">
+      <span id="toast-icon" class="toast-icon"></span>
       <span id="toast-message"></span>
     </div>
   </div>

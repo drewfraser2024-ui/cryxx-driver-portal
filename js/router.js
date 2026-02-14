@@ -18,6 +18,14 @@ const Router = {
         this.navigate(card.dataset.goto);
       });
     });
+
+    // Breadcrumb clicks
+    document.querySelectorAll('.breadcrumb a[data-page]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.navigate(link.dataset.page);
+      });
+    });
   },
 
   navigate(page) {
@@ -42,12 +50,19 @@ const Router = {
     const overlay = document.getElementById('sidebar-overlay');
     if (overlay) overlay.classList.remove('active');
 
+    // Scroll to top
+    window.scrollTo(0, 0);
+
     // Trigger page-specific load
     if (page === 'admin' && Auth.isAdmin()) {
       Admin.loadDashboard();
     }
     if (page === 'schedule') {
       Schedule.render();
+    }
+    if (page === 'dashboard') {
+      Dashboard.updateGreeting();
+      Dashboard.loadPendingCounts();
     }
   }
 };
