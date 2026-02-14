@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRYXX Solutions - Driver Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="screen active">
+      <div class="auth-container">
+        <div class="auth-logo">
+          <h1>CRYXX</h1>
+          <p>Solutions and Associates Inc.</p>
+        </div>
+        <form id="login-form" class="auth-form">
+          <h2>Sign In</h2>
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="Password">
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Sign In</button>
+          <p class="auth-toggle">Don't have an account? <a href="#" id="show-register">Register</a></p>
+        </form>
+        <form id="register-form" class="auth-form hidden">
+          <h2>Register</h2>
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" required placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" required placeholder="your@email.com">
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" required minlength="6" placeholder="Min 6 characters">
+          </div>
+          <div class="form-group">
+            <label for="reg-role">Role</label>
+            <select id="reg-role" required>
+              <option value="driver">Driver</option>
+              <option value="admin">Admin / Owner</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Register</button>
+          <p class="auth-toggle">Already have an account? <a href="#" id="show-login">Sign In</a></p>
+        </form>
+      </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="screen">
+      <!-- Sidebar -->
+      <nav id="sidebar">
+        <div class="sidebar-header">
+          <h2>CRYXX</h2>
+          <span id="user-role-badge" class="badge">Driver</span>
+        </div>
+        <div class="sidebar-user">
+          <div class="avatar" id="user-avatar">D</div>
+          <span id="user-name">Driver</span>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#" data-page="dashboard" class="nav-link active">
+            <span class="nav-icon">&#9776;</span> Dashboard
+          </a></li>
+          <li><a href="#" data-page="vacation" class="nav-link">
+            <span class="nav-icon">&#9992;</span> Days Off / Vacation
+          </a></li>
+          <li><a href="#" data-page="contact" class="nav-link">
+            <span class="nav-icon">&#9993;</span> Contact Owner
+          </a></li>
+          <li><a href="#" data-page="payroll" class="nav-link">
+            <span class="nav-icon">&#36;</span> Payroll Issues
+          </a></li>
+          <li><a href="#" data-page="schedule" class="nav-link">
+            <span class="nav-icon">&#128197;</span> Driver Schedule
+          </a></li>
+          <li><a href="#" data-page="uniforms" class="nav-link">
+            <span class="nav-icon">&#128085;</span> Uniform Request
+          </a></li>
+          <li><a href="#" data-page="loading" class="nav-link">
+            <span class="nav-icon">&#128666;</span> Truck Loading
+          </a></li>
+          <li id="admin-nav" class="hidden"><a href="#" data-page="admin" class="nav-link">
+            <span class="nav-icon">&#9881;</span> Admin Dashboard
+          </a></li>
+        </ul>
+        <div class="sidebar-footer">
+          <button id="logout-btn" class="btn btn-outline btn-full">Sign Out</button>
+        </div>
+      </nav>
+
+      <!-- Mobile Header -->
+      <div id="mobile-header">
+        <button id="menu-toggle" class="menu-btn">&#9776;</button>
+        <h2>CRYXX</h2>
+        <div class="avatar-sm" id="mobile-avatar">D</div>
+      </div>
+
+      <!-- Content Area -->
+      <main id="content">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard" class="page active">
+          <div class="page-header">
+            <h1>Welcome back, <span id="dashboard-name">Driver</span></h1>
+            <p class="subtitle">Here's your quick overview</p>
+          </div>
+          <div class="dashboard-grid">
+            <div class="dash-card" data-goto="vacation">
+              <div class="dash-icon">&#9992;</div>
+              <h3>Days Off / Vacation</h3>
+              <p>Request time off or vacation days</p>
+            </div>
+            <div class="dash-card" data-goto="contact">
+              <div class="dash-icon">&#9993;</div>
+              <h3>Contact Owner</h3>
+              <p>Reach out about any issues</p>
+            </div>
+            <div class="dash-card" data-goto="payroll">
+              <div class="dash-icon">&#36;</div>
+              <h3>Payroll Issues</h3>
+              <p>Report payroll discrepancies</p>
+            </div>
+            <div class="dash-card" data-goto="schedule">
+              <div class="dash-icon">&#128197;</div>
+              <h3>Driver Schedule</h3>
+              <p>View your weekly schedule</p>
+            </div>
+            <div class="dash-card" data-goto="uniforms">
+              <div class="dash-icon">&#128085;</div>
+              <h3>Uniform Request</h3>
+              <p>Order new uniform items</p>
+            </div>
+            <div class="dash-card" data-goto="loading">
+              <div class="dash-icon">&#128666;</div>
+              <h3>Truck Loading</h3>
+              <p>Suggest how to load your truck</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vacation Request Page -->
+        <div id="page-vacation" class="page">
+          <div class="page-header">
+            <h1>Days Off / Vacation Request</h1>
+            <p class="subtitle">Submit your time-off request below</p>
+          </div>
+          <div class="card">
+            <form id="vacation-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="vac-type">Request Type</label>
+                  <select id="vac-type" required>
+                    <option value="">Select type...</option>
+                    <option value="vacation">Vacation</option>
+                    <option value="personal">Personal Day</option>
+                    <option value="sick">Sick Day</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="vac-urgency">Urgency</label>
+                  <select id="vac-urgency">
+                    <option value="normal">Normal</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="vac-start">Start Date</label>
+                  <input type="date" id="vac-start" required>
+                </div>
+                <div class="form-group">
+                  <label for="vac-end">End Date</label>
+                  <input type="date" id="vac-end" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="vac-reason">Reason / Notes</label>
+                <textarea id="vac-reason" rows="4" placeholder="Optional: provide a reason or additional details"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Request</button>
+            </form>
+          </div>
+          <div class="card mt-4">
+            <h3>Your Recent Requests</h3>
+            <div id="vacation-history" class="history-list">
+              <p class="empty-state">No requests yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Owner Page -->
+        <div id="page-contact" class="page">
+          <div class="page-header">
+            <h1>Contact Owner</h1>
+            <p class="subtitle">Send a message to the company owner</p>
+          </div>
+          <div class="card">
+            <form id="contact-form">
+              <div class="form-group">
+                <label for="contact-category">Category</label>
+                <select id="contact-category" required>
+                  <option value="">Select category...</option>
+                  <option value="vehicle">Vehicle Issue</option>
+                  <option value="route">Route Concern</option>
+                  <option value="safety">Safety Concern</option>
+                  <option value="complaint">Complaint</option>
+                  <option value="suggestion">Suggestion</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="contact-subject">Subject</label>
+                <input type="text" id="contact-subject" required placeholder="Brief subject line">
+              </div>
+              <div class="form-group">
+                <label for="contact-message">Message</label>
+                <textarea id="contact-message" rows="6" required placeholder="Describe your issue in detail..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="contact-priority">Priority</label>
+                <select id="contact-priority">
+                  <option value="low">Low</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
+          </div>
+          <div class="card mt-4">
+            <h3>Your Previous Messages</h3>
+            <div id="contact-history" class="history-list">
+              <p class="empty-state">No messages sent yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payroll Issues Page -->
+        <div id="page-payroll" class="page">
+          <div class="page-header">
+            <h1>Payroll Issues</h1>
+            <p class="subtitle">Report any payroll discrepancies or questions</p>
+          </div>
+          <div class="card">
+            <form id="payroll-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="pay-period">Pay Period</label>
+                  <input type="text" id="pay-period" required placeholder="e.g. Jan 1 - Jan 15, 2026">
+                </div>
+                <div class="form-group">
+                  <label for="pay-type">Issue Type</label>
+                  <select id="pay-type" required>
+                    <option value="">Select issue type...</option>
+                    <option value="missing_hours">Missing Hours</option>
+                    <option value="wrong_rate">Wrong Pay Rate</option>
+                    <option value="missing_overtime">Missing Overtime</option>
+                    <option value="deduction">Incorrect Deduction</option>
+                    <option value="bonus">Missing Bonus</option>
+                    <option value="tax">Tax Withholding Issue</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="pay-expected">Expected Amount ($)</label>
+                <input type="number" id="pay-expected" step="0.01" placeholder="What you expected to receive">
+              </div>
+              <div class="form-group">
+                <label for="pay-received">Received Amount ($)</label>
+                <input type="number" id="pay-received" step="0.01" placeholder="What you actually received">
+              </div>
+              <div class="form-group">
+                <label for="pay-details">Description of Issue</label>
+                <textarea id="pay-details" rows="5" required placeholder="Please describe the payroll issue in detail..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Issue</button>
+            </form>
+          </div>
+          <div class="card mt-4">
+            <h3>Your Payroll Issues</h3>
+            <div id="payroll-history" class="history-list">
+              <p class="empty-state">No payroll issues submitted</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Driver Schedule Page -->
+        <div id="page-schedule" class="page">
+          <div class="page-header">
+            <h1>Driver Schedule</h1>
+            <p class="subtitle">View and manage your weekly schedule</p>
+          </div>
+          <div class="schedule-controls card">
+            <button id="schedule-prev" class="btn btn-outline">&larr; Previous Week</button>
+            <h3 id="schedule-week-label">Week of Feb 10, 2026</h3>
+            <button id="schedule-next" class="btn btn-outline">Next Week &rarr;</button>
+          </div>
+          <div id="schedule-grid" class="schedule-grid">
+            <!-- Generated by JS -->
+          </div>
+          <div id="admin-schedule-controls" class="card mt-4 hidden">
+            <h3>Assign Schedule (Admin)</h3>
+            <form id="schedule-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sched-driver">Driver</label>
+                  <select id="sched-driver" required>
+                    <option value="">Select driver...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="sched-date">Date</label>
+                  <input type="date" id="sched-date" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="sched-start">Start Time</label>
+                  <input type="time" id="sched-start" required>
+                </div>
+                <div class="form-group">
+                  <label for="sched-end">End Time</label>
+                  <input type="time" id="sched-end" required>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="sched-route">Route / Notes</label>
+                <input type="text" id="sched-route" placeholder="e.g. Route 12 - Downtown">
+              </div>
+              <button type="submit" class="btn btn-primary">Add Schedule Entry</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Uniform Request Page -->
+        <div id="page-uniforms" class="page">
+          <div class="page-header">
+            <h1>Uniform Request</h1>
+            <p class="subtitle">Order new uniform items</p>
+          </div>
+          <div class="card">
+            <form id="uniform-form">
+              <div class="form-group">
+                <label>Select Items Needed</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="shirt"> Polo Shirt
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="pants"> Work Pants
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="jacket"> Jacket
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="hat"> Hat / Cap
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="boots"> Safety Boots
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="vest"> Safety Vest
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="gloves"> Work Gloves
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="uniform-items" value="belt"> Belt
+                  </label>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="uni-shirt-size">Shirt Size</label>
+                  <select id="uni-shirt-size">
+                    <option value="">N/A</option>
+                    <option value="S">Small</option>
+                    <option value="M">Medium</option>
+                    <option value="L">Large</option>
+                    <option value="XL">X-Large</option>
+                    <option value="2XL">2X-Large</option>
+                    <option value="3XL">3X-Large</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="uni-pant-size">Pant Size</label>
+                  <input type="text" id="uni-pant-size" placeholder="e.g. 32x30">
+                </div>
+                <div class="form-group">
+                  <label for="uni-shoe-size">Shoe Size</label>
+                  <input type="text" id="uni-shoe-size" placeholder="e.g. 10.5">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="uni-notes">Additional Notes</label>
+                <textarea id="uni-notes" rows="3" placeholder="Any special requirements or preferences..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Request</button>
+            </form>
+          </div>
+          <div class="card mt-4">
+            <h3>Your Uniform Requests</h3>
+            <div id="uniform-history" class="history-list">
+              <p class="empty-state">No uniform requests yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Truck Loading Suggestions Page -->
+        <div id="page-loading" class="page">
+          <div class="page-header">
+            <h1>Truck Loading Suggestions</h1>
+            <p class="subtitle">Share how you'd like your truck loaded</p>
+          </div>
+          <div class="card">
+            <form id="loading-form">
+              <div class="form-group">
+                <label for="load-truck">Truck / Vehicle ID</label>
+                <input type="text" id="load-truck" required placeholder="e.g. Truck #42">
+              </div>
+              <div class="form-group">
+                <label for="load-route">Route</label>
+                <input type="text" id="load-route" placeholder="e.g. Route 7 - Eastside">
+              </div>
+              <div class="form-group">
+                <label for="load-suggestion">Loading Suggestion</label>
+                <textarea id="load-suggestion" rows="6" required placeholder="Describe how you'd like your truck loaded. Include details like:
+- Order of items
+- Heavy items placement
+- Fragile items handling
+- Route-specific loading needs
+- Any issues with current loading"></textarea>
+              </div>
+              <div class="form-group">
+                <label for="load-priority">Priority</label>
+                <select id="load-priority">
+                  <option value="suggestion">General Suggestion</option>
+                  <option value="improvement">Improvement Needed</option>
+                  <option value="urgent">Urgent Change Needed</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit Suggestion</button>
+            </form>
+          </div>
+          <div class="card mt-4">
+            <h3>Your Previous Suggestions</h3>
+            <div id="loading-history" class="history-list">
+              <p class="empty-state">No suggestions submitted yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Dashboard Page -->
+        <div id="page-admin" class="page">
+          <div class="page-header">
+            <h1>Admin Dashboard</h1>
+            <p class="subtitle">Review all driver submissions</p>
+          </div>
+          <div class="admin-stats">
+            <div class="stat-card">
+              <div class="stat-number" id="stat-vacation">0</div>
+              <div class="stat-label">Vacation Requests</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-contact">0</div>
+              <div class="stat-label">Messages</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-payroll">0</div>
+              <div class="stat-label">Payroll Issues</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-uniforms">0</div>
+              <div class="stat-label">Uniform Requests</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-loading">0</div>
+              <div class="stat-label">Loading Suggestions</div>
+            </div>
+          </div>
+          <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="vacation">Vacation</button>
+            <button class="admin-tab" data-tab="contact">Messages</button>
+            <button class="admin-tab" data-tab="payroll">Payroll</button>
+            <button class="admin-tab" data-tab="uniforms">Uniforms</button>
+            <button class="admin-tab" data-tab="loading">Loading</button>
+          </div>
+          <div class="card">
+            <div id="admin-content" class="admin-content">
+              <p class="empty-state">Select a category above to view submissions</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+      <span id="toast-message"></span>
+    </div>
+  </div>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/forms.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/schedule.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
