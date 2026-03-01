@@ -17,12 +17,14 @@ const Admin = {
   async loadDashboard() {
     // Load counts
     try {
-      const [vacCount, contactCount, payrollCount, uniformCount, loadingCount] = await Promise.all([
+      const [vacCount, contactCount, payrollCount, uniformCount, loadingCount, inspCount, accCount] = await Promise.all([
         DB.count('vacation_requests'),
         DB.count('contact_messages'),
         DB.count('payroll_issues'),
         DB.count('uniform_requests'),
-        DB.count('loading_suggestions')
+        DB.count('loading_suggestions'),
+        DB.count('trip_inspections'),
+        DB.count('accident_reports')
       ]);
 
       document.getElementById('stat-vacation').textContent = vacCount;
@@ -30,6 +32,8 @@ const Admin = {
       document.getElementById('stat-payroll').textContent = payrollCount;
       document.getElementById('stat-uniforms').textContent = uniformCount;
       document.getElementById('stat-loading').textContent = loadingCount;
+      document.getElementById('stat-inspections').textContent = inspCount;
+      document.getElementById('stat-accidents').textContent = accCount;
     } catch (err) {
       console.error('Error loading admin stats:', err);
     }
@@ -47,7 +51,9 @@ const Admin = {
       contact: 'contact_messages',
       payroll: 'payroll_issues',
       uniforms: 'uniform_requests',
-      loading: 'loading_suggestions'
+      loading: 'loading_suggestions',
+      inspections: 'trip_inspections',
+      accidents: 'accident_reports'
     };
 
     try {
@@ -180,6 +186,52 @@ const Admin = {
                 <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Acknowledge</button>
               </div>
             ` : ''}
+          </div>
+        `;
+
+      case 'inspections':
+        const inspPhotos = item.photo_urls ? item.photo_urls.split(',').map(url =>
+          `<img src="${escapeHtml(url.trim())}" alt="Inspection photo" class="admin-photo">`
+        ).join('') : '';
+        return `
+          <div class="admin-item">
+            <div class="admin-item-header">
+              <h4>${escapeHtml(item.user_name)} - ${capitalize(item.trip_type)}</h4>
+              <span class="meta">${formatDateTime(item.created_at)}</span>
+            </div>
+            <div class="admin-item-body">
+              <p><strong>Date:</strong> ${formatDate(item.trip_date)} | <strong>Vehicle:</strong> ${escapeHtml(item.vehicle_id)}</p>
+              ${item.mileage ? `<p><strong>Mileage:</strong> ${escapeHtml(item.mileage)}</p>` : ''}
+              ${item.checklist ? `<p><strong>Checklist:</strong> ${escapeHtml(item.checklist)}</p>` : ''}
+              ${item.notes ? `<p><strong>Notes:</strong> ${escapeHtml(item.notes)}</p>` : ''}
+              ${inspPhotos ? `<div class="photo-grid">${inspPhotos}</div>` : ''}
+              <p>${statusHtml}</p>
+            </div>
+            ${item.status === 'pending' ? actionsHtml : ''}
+          </div>
+        `;
+
+      case 'accidents':
+        const accPhotos = item.photo_urls ? item.photo_urls.split(',').map(url =>
+          `<img src="${escapeHtml(url.trim())}" alt="Accident photo" class="admin-photo">`
+        ).join('') : '';
+        return `
+          <div class="admin-item">
+            <div class="admin-item-header">
+              <h4>${escapeHtml(item.user_name)} - ${escapeHtml(item.location)}</h4>
+              <span class="meta">${formatDateTime(item.created_at)}</span>
+            </div>
+            <div class="admin-item-body">
+              <p><strong>Date:</strong> ${formatDate(item.report_date)} | <strong>Time:</strong> ${item.incident_time}</p>
+              <p><strong>Vehicle:</strong> ${escapeHtml(item.vehicle_id)} | <strong>Damage:</strong> ${capitalize(item.damage_level)}</p>
+              <p>${escapeHtml(item.description)}</p>
+              ${item.injuries ? `<p style="color:var(--danger)"><strong>Injuries:</strong> ${escapeHtml(item.injuries_description || 'Yes')}</p>` : '<p><strong>Injuries:</strong> None</p>'}
+              ${item.witness_info ? `<p><strong>Witnesses:</strong> ${escapeHtml(item.witness_info)}</p>` : ''}
+              ${item.police_report_number ? `<p><strong>Police Report #:</strong> ${escapeHtml(item.police_report_number)}</p>` : ''}
+              ${accPhotos ? `<div class="photo-grid">${accPhotos}</div>` : ''}
+              <p>${statusHtml}</p>
+            </div>
+            ${item.status === 'pending' ? actionsHtml : ''}
           </div>
         `;
 

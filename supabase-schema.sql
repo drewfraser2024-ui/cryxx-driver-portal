@@ -78,6 +78,42 @@ CREATE TABLE loading_suggestions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Trip Inspections (Pre/Post Trip Photos)
+CREATE TABLE trip_inspections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  user_name TEXT NOT NULL,
+  trip_type TEXT NOT NULL CHECK (trip_type IN ('pre-trip', 'post-trip')),
+  trip_date DATE NOT NULL,
+  vehicle_id TEXT NOT NULL,
+  mileage TEXT,
+  checklist TEXT,
+  photo_urls TEXT,
+  notes TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'denied')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Accident Reports
+CREATE TABLE accident_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  user_name TEXT NOT NULL,
+  report_date DATE NOT NULL,
+  incident_time TIME NOT NULL,
+  location TEXT NOT NULL,
+  vehicle_id TEXT NOT NULL,
+  description TEXT NOT NULL,
+  injuries BOOLEAN DEFAULT false,
+  injuries_description TEXT,
+  damage_level TEXT CHECK (damage_level IN ('minor', 'moderate', 'severe')),
+  photo_urls TEXT,
+  witness_info TEXT,
+  police_report_number TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'denied')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Schedule Entries
 CREATE TABLE schedule_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -97,6 +133,8 @@ ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payroll_issues ENABLE ROW LEVEL SECURITY;
 ALTER TABLE uniform_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loading_suggestions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE trip_inspections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accident_reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE schedule_entries ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: users can read own, admins can read all
@@ -129,6 +167,16 @@ CREATE POLICY "Admins can update uniform requests" ON uniform_requests FOR UPDAT
 CREATE POLICY "Drivers see own loading suggestions" ON loading_suggestions FOR SELECT USING (auth.uid() = user_id OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 CREATE POLICY "Drivers create own loading suggestions" ON loading_suggestions FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Admins can update loading suggestions" ON loading_suggestions FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- Trip Inspections
+CREATE POLICY "Drivers see own trip inspections" ON trip_inspections FOR SELECT USING (auth.uid() = user_id OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Drivers create own trip inspections" ON trip_inspections FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Admins can update trip inspections" ON trip_inspections FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- Accident Reports
+CREATE POLICY "Drivers see own accident reports" ON accident_reports FOR SELECT USING (auth.uid() = user_id OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Drivers create own accident reports" ON accident_reports FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Admins can update accident reports" ON accident_reports FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 
 -- Schedule Entries
 CREATE POLICY "All users see schedule entries" ON schedule_entries FOR SELECT USING (true);

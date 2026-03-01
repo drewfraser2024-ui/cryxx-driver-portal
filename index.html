@@ -90,6 +90,12 @@
           <li><a href="#" data-page="loading" class="nav-link">
             <span class="nav-icon">&#128666;</span> Truck Loading
           </a></li>
+          <li><a href="#" data-page="inspections" class="nav-link">
+            <span class="nav-icon">&#128247;</span> Trip Inspections
+          </a></li>
+          <li><a href="#" data-page="accidents" class="nav-link">
+            <span class="nav-icon">&#9888;</span> Accident Reports
+          </a></li>
           <li id="admin-nav" class="hidden"><a href="#" data-page="admin" class="nav-link">
             <span class="nav-icon">&#9881;</span> Admin Dashboard
           </a></li>
@@ -169,6 +175,24 @@
               </div>
               <h3>Truck Loading</h3>
               <p>Suggest how to load your truck</p>
+              <span class="dash-arrow">&#8594;</span>
+            </div>
+            <div class="dash-card" data-goto="inspections">
+              <div class="dash-card-top">
+                <div class="dash-icon">&#128247;</div>
+                <span id="dash-badge-inspections" class="dash-badge zero">0 pending</span>
+              </div>
+              <h3>Trip Inspections</h3>
+              <p>Upload pre &amp; post trip photos</p>
+              <span class="dash-arrow">&#8594;</span>
+            </div>
+            <div class="dash-card" data-goto="accidents">
+              <div class="dash-card-top">
+                <div class="dash-icon">&#9888;</div>
+                <span id="dash-badge-accidents" class="dash-badge zero">0 pending</span>
+              </div>
+              <h3>Accident Reports</h3>
+              <p>Report incidents with photos</p>
               <span class="dash-arrow">&#8594;</span>
             </div>
           </div>
@@ -519,6 +543,190 @@
           </div>
         </div>
 
+        <!-- Trip Inspections Page -->
+        <div id="page-inspections" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Trip Inspections</span>
+          </div>
+          <div class="page-header">
+            <h1>Trip Inspections</h1>
+            <p class="subtitle">Upload pre-trip and post-trip inspection photos</p>
+          </div>
+          <div class="card">
+            <form id="inspection-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="insp-type">Inspection Type</label>
+                  <select id="insp-type" required>
+                    <option value="">Select type...</option>
+                    <option value="pre-trip">Pre-Trip</option>
+                    <option value="post-trip">Post-Trip</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="insp-date">Date</label>
+                  <input type="date" id="insp-date" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="insp-vehicle">Vehicle ID</label>
+                  <input type="text" id="insp-vehicle" required placeholder="e.g. Truck #42">
+                </div>
+                <div class="form-group">
+                  <label for="insp-mileage">Odometer / Mileage</label>
+                  <input type="text" id="insp-mileage" placeholder="e.g. 45,230">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Inspection Checklist</label>
+                <div class="checkbox-grid">
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="tires"> Tires
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="lights"> Lights
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="brakes"> Brakes
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="fluids"> Fluids
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="mirrors"> Mirrors
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="horn"> Horn
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="wipers"> Wipers
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="seat_belt"> Seat Belt
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="fire_extinguisher"> Fire Extinguisher
+                  </label>
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="insp-checklist" value="reflective_triangles"> Reflective Triangles
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="insp-photos">Upload Photos</label>
+                <div class="photo-upload-area" id="insp-upload-area">
+                  <input type="file" id="insp-photos" multiple accept="image/*" class="photo-input">
+                  <div class="upload-placeholder">
+                    <span class="upload-icon">&#128247;</span>
+                    <p>Click or drag photos here</p>
+                    <p class="upload-hint">Max 5MB per photo</p>
+                  </div>
+                </div>
+                <div id="insp-preview" class="photo-preview-grid"></div>
+              </div>
+              <div class="form-group">
+                <label for="insp-notes">Notes</label>
+                <textarea id="insp-notes" rows="3" placeholder="Any observations or issues found..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Submit Inspection</span></button>
+            </form>
+          </div>
+          <div class="card mt-4">
+            <h3>Your Trip Inspections</h3>
+            <div id="inspection-history" class="history-list">
+              <p class="empty-state">No inspections submitted yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accident Reports Page -->
+        <div id="page-accidents" class="page">
+          <div class="breadcrumb">
+            <a href="#" data-page="dashboard">&#8962; Dashboard</a>
+            <span class="separator">&#8250;</span>
+            <span class="current">Accident Reports</span>
+          </div>
+          <div class="page-header">
+            <h1>Accident Reports</h1>
+            <p class="subtitle">Report any incidents or accidents</p>
+          </div>
+          <div class="card">
+            <form id="accident-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="acc-date">Date of Incident</label>
+                  <input type="date" id="acc-date" required>
+                </div>
+                <div class="form-group">
+                  <label for="acc-time">Time of Incident</label>
+                  <input type="time" id="acc-time" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="acc-location">Location</label>
+                  <input type="text" id="acc-location" required placeholder="e.g. 123 Main St & 5th Ave">
+                </div>
+                <div class="form-group">
+                  <label for="acc-vehicle">Vehicle ID</label>
+                  <input type="text" id="acc-vehicle" required placeholder="e.g. Truck #42">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="acc-description">Description of Incident</label>
+                <textarea id="acc-description" rows="5" required placeholder="Describe what happened in detail..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="acc-damage">Damage Level</label>
+                <select id="acc-damage" required>
+                  <option value="">Select severity...</option>
+                  <option value="minor">Minor</option>
+                  <option value="moderate">Moderate</option>
+                  <option value="severe">Severe</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-item" style="margin-bottom:0.5rem">
+                  <input type="checkbox" id="acc-injuries"> Were there any injuries?
+                </label>
+                <div id="acc-injuries-detail-group" class="hidden">
+                  <textarea id="acc-injuries-detail" rows="3" placeholder="Describe the injuries..."></textarea>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="acc-photos">Upload Photos</label>
+                <div class="photo-upload-area" id="acc-upload-area">
+                  <input type="file" id="acc-photos" multiple accept="image/*" class="photo-input">
+                  <div class="upload-placeholder">
+                    <span class="upload-icon">&#128247;</span>
+                    <p>Click or drag photos here</p>
+                    <p class="upload-hint">Max 5MB per photo</p>
+                  </div>
+                </div>
+                <div id="acc-preview" class="photo-preview-grid"></div>
+              </div>
+              <div class="form-group">
+                <label for="acc-witness">Witness Information</label>
+                <textarea id="acc-witness" rows="3" placeholder="Names, contact info, statements..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="acc-police">Police Report Number</label>
+                <input type="text" id="acc-police" placeholder="If applicable">
+              </div>
+              <button type="submit" class="btn btn-primary"><span class="btn-text">Submit Report</span></button>
+            </form>
+          </div>
+          <div class="card mt-4">
+            <h3>Your Accident Reports</h3>
+            <div id="accident-history" class="history-list">
+              <p class="empty-state">No reports submitted yet</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Admin Dashboard Page -->
         <div id="page-admin" class="page">
           <div class="breadcrumb">
@@ -551,6 +759,14 @@
               <div class="stat-number" id="stat-loading">0</div>
               <div class="stat-label">Loading Suggestions</div>
             </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-inspections">0</div>
+              <div class="stat-label">Trip Inspections</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="stat-accidents">0</div>
+              <div class="stat-label">Accident Reports</div>
+            </div>
           </div>
           <div class="admin-tabs">
             <button class="admin-tab active" data-tab="vacation">Vacation</button>
@@ -558,6 +774,8 @@
             <button class="admin-tab" data-tab="payroll">Payroll</button>
             <button class="admin-tab" data-tab="uniforms">Uniforms</button>
             <button class="admin-tab" data-tab="loading">Loading</button>
+            <button class="admin-tab" data-tab="inspections">Inspections</button>
+            <button class="admin-tab" data-tab="accidents">Accidents</button>
           </div>
           <div class="card">
             <div id="admin-content" class="admin-content">

@@ -15,6 +15,28 @@ function initSupabase() {
   }
 }
 
+// ===== Photo Upload Helper =====
+async function uploadPhoto(file) {
+  if (!supabaseClient) throw new Error('Database not connected');
+  if (!file.type.startsWith('image/')) throw new Error('Only image files are allowed');
+  if (file.size > 5 * 1024 * 1024) throw new Error('File too large (max 5MB)');
+
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}-${file.name}`;
+  const filePath = `uploads/${fileName}`;
+
+  const { data, error } = await supabaseClient.storage
+    .from('photos')
+    .upload(filePath, file);
+
+  if (error) throw error;
+
+  const { data: urlData } = supabaseClient.storage
+    .from('photos')
+    .getPublicUrl(filePath);
+
+  return urlData.publicUrl;
+}
+
 // ===== Database Abstraction Layer =====
 const DB = {
   async insert(table, record) {

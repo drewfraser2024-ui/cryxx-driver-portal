@@ -6,6 +6,8 @@ const Forms = {
     this.setupPayrollForm();
     this.setupUniformForm();
     this.setupLoadingForm();
+    this.setupInspectionForm();
+    this.setupAccidentForm();
   },
 
   // --- Vacation Request ---
@@ -286,6 +288,221 @@ const Forms = {
     }
   },
 
+  // --- Trip Inspections ---
+  setupInspectionForm() {
+    const form = document.getElementById('inspection-form');
+    const photoInput = document.getElementById('insp-photos');
+    const previewContainer = document.getElementById('insp-preview');
+
+    // Photo preview on file select
+    photoInput.addEventListener('change', () => {
+      previewContainer.innerHTML = '';
+      Array.from(photoInput.files).forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const div = document.createElement('div');
+          div.className = 'photo-preview-item';
+          div.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="photo-remove-btn" data-index="${i}">&times;</button>`;
+          previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Remove photo preview (note: can't modify FileList, just hides preview)
+    previewContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('photo-remove-btn')) {
+        e.target.closest('.photo-preview-item').remove();
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true);
+      try {
+        // Upload photos
+        const photoUrls = [];
+        const files = photoInput.files;
+        for (let i = 0; i < files.length; i++) {
+          const url = await uploadPhoto(files[i]);
+          photoUrls.push(url);
+        }
+
+        // Collect checklist
+        const checkedItems = Array.from(document.querySelectorAll('input[name="insp-checklist"]:checked'))
+          .map(cb => cb.value);
+
+        await DB.insert('trip_inspections', {
+          user_id: Auth.getUserId(),
+          user_name: Auth.getUserName(),
+          trip_type: document.getElementById('insp-type').value,
+          trip_date: document.getElementById('insp-date').value,
+          vehicle_id: document.getElementById('insp-vehicle').value,
+          mileage: document.getElementById('insp-mileage').value || null,
+          checklist: checkedItems.join(', '),
+          photo_urls: photoUrls.join(','),
+          notes: document.getElementById('insp-notes').value,
+          status: 'pending'
+        });
+
+        form.reset();
+        previewContainer.innerHTML = '';
+        showFormSuccess(form, 'Inspection submitted!');
+        showToast('Trip inspection submitted!', 'success');
+        this.loadInspectionHistory();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
+      }
+    });
+    this.loadInspectionHistory();
+  },
+
+  async loadInspectionHistory() {
+    const container = document.getElementById('inspection-history');
+    try {
+      const data = await DB.select('trip_inspections', { user_id: Auth.getUserId() });
+      if (data.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128247;</div><p>No inspections submitted yet</p></div>';
+        return;
+      }
+      container.innerHTML = data.map(item => {
+        const photos = item.photo_urls ? item.photo_urls.split(',').map(url =>
+          `<img src="${escapeHtml(url.trim())}" alt="Inspection photo" class="history-photo">`
+        ).join('') : '';
+        return `
+          <div class="history-item">
+            <div class="history-item-info">
+              <h4>${capitalize(item.trip_type)} - ${escapeHtml(item.vehicle_id)}</h4>
+              <p>Date: ${formatDate(item.trip_date)}${item.mileage ? ` | Mileage: ${escapeHtml(item.mileage)}` : ''}</p>
+              ${item.checklist ? `<p style="font-size:0.8rem">Checked: ${escapeHtml(item.checklist)}</p>` : ''}
+              ${item.notes ? `<p>${escapeHtml(truncate(item.notes, 100))}</p>` : ''}
+              ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
+              <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)}</p>
+            </div>
+            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = '<div class="empty-state">Error loading history</div>';
+    }
+  },
+
+  // --- Accident Reports ---
+  setupAccidentForm() {
+    const form = document.getElementById('accident-form');
+    const photoInput = document.getElementById('acc-photos');
+    const previewContainer = document.getElementById('acc-preview');
+    const injuriesCheckbox = document.getElementById('acc-injuries');
+    const injuriesDetailGroup = document.getElementById('acc-injuries-detail-group');
+
+    // Toggle injuries detail
+    injuriesCheckbox.addEventListener('change', () => {
+      injuriesDetailGroup.classList.toggle('hidden', !injuriesCheckbox.checked);
+    });
+
+    // Photo preview on file select
+    photoInput.addEventListener('change', () => {
+      previewContainer.innerHTML = '';
+      Array.from(photoInput.files).forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const div = document.createElement('div');
+          div.className = 'photo-preview-item';
+          div.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="photo-remove-btn" data-index="${i}">&times;</button>`;
+          previewContainer.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    previewContainer.addEventListener('click', (e) => {
+      if (e.target.classList.contains('photo-remove-btn')) {
+        e.target.closest('.photo-preview-item').remove();
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      setButtonLoading(btn, true);
+      try {
+        // Upload photos
+        const photoUrls = [];
+        const files = photoInput.files;
+        for (let i = 0; i < files.length; i++) {
+          const url = await uploadPhoto(files[i]);
+          photoUrls.push(url);
+        }
+
+        const hasInjuries = injuriesCheckbox.checked;
+
+        await DB.insert('accident_reports', {
+          user_id: Auth.getUserId(),
+          user_name: Auth.getUserName(),
+          report_date: document.getElementById('acc-date').value,
+          incident_time: document.getElementById('acc-time').value,
+          location: document.getElementById('acc-location').value,
+          vehicle_id: document.getElementById('acc-vehicle').value,
+          description: document.getElementById('acc-description').value,
+          injuries: hasInjuries,
+          injuries_description: hasInjuries ? document.getElementById('acc-injuries-detail').value : null,
+          damage_level: document.getElementById('acc-damage').value,
+          photo_urls: photoUrls.join(','),
+          witness_info: document.getElementById('acc-witness').value || null,
+          police_report_number: document.getElementById('acc-police').value || null,
+          status: 'pending'
+        });
+
+        form.reset();
+        previewContainer.innerHTML = '';
+        injuriesDetailGroup.classList.add('hidden');
+        showFormSuccess(form, 'Report submitted!');
+        showToast('Accident report submitted!', 'success');
+        this.loadAccidentHistory();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
+      }
+    });
+    this.loadAccidentHistory();
+  },
+
+  async loadAccidentHistory() {
+    const container = document.getElementById('accident-history');
+    try {
+      const data = await DB.select('accident_reports', { user_id: Auth.getUserId() });
+      if (data.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#9888;</div><p>No reports submitted yet</p></div>';
+        return;
+      }
+      container.innerHTML = data.map(item => {
+        const photos = item.photo_urls ? item.photo_urls.split(',').map(url =>
+          `<img src="${escapeHtml(url.trim())}" alt="Accident photo" class="history-photo">`
+        ).join('') : '';
+        return `
+          <div class="history-item">
+            <div class="history-item-info">
+              <h4>${escapeHtml(item.location)} - ${capitalize(item.damage_level)}</h4>
+              <p>Date: ${formatDate(item.report_date)} | Vehicle: ${escapeHtml(item.vehicle_id)}</p>
+              <p>${escapeHtml(truncate(item.description, 100))}</p>
+              ${item.injuries ? `<p style="color:var(--danger)"><strong>Injuries reported</strong></p>` : ''}
+              ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
+              <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)}</p>
+            </div>
+            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = '<div class="empty-state">Error loading history</div>';
+    }
+  },
+
   // Reload all histories (e.g., on login)
   reloadAll() {
     this.loadVacationHistory();
@@ -293,6 +510,8 @@ const Forms = {
     this.loadPayrollHistory();
     this.loadUniformHistory();
     this.loadLoadingHistory();
+    this.loadInspectionHistory();
+    this.loadAccidentHistory();
   }
 };
 
@@ -322,7 +541,9 @@ const Dashboard = {
       contact: 'contact_messages',
       payroll: 'payroll_issues',
       uniforms: 'uniform_requests',
-      loading: 'loading_suggestions'
+      loading: 'loading_suggestions',
+      inspections: 'trip_inspections',
+      accidents: 'accident_reports'
     };
 
     for (const [key, table] of Object.entries(tables)) {
