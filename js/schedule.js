@@ -114,6 +114,7 @@ const Schedule = {
               <div class="time">${this.formatTime(e.start_time)} - ${this.formatTime(e.end_time)}</div>
               ${e.route ? `<div class="route">${escapeHtml(e.route)}</div>` : ''}
               ${Auth.isAdmin() ? `<div class="route">${escapeHtml(e.driver_name)}</div>` : ''}
+              ${Auth.isAdmin() ? `<button class="btn btn-danger btn-sm delete-btn schedule-delete-btn" onclick="deleteRecord('schedule_entries', '${e.id}', this)" title="Delete shift">&#128465;</button>` : ''}
             </div>
           `).join('') : '<p style="font-size:0.75rem;color:var(--gray-400);text-align:center;padding:0.5rem">No shifts</p>'}
         </div>
