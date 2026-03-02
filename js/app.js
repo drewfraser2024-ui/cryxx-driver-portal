@@ -57,12 +57,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const name = document.getElementById('reg-name').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const password = document.getElementById('reg-password').value;
-    const role = document.getElementById('reg-role').value;
     const btn = registerForm.querySelector('button[type="submit"]');
 
     setButtonLoading(btn, true);
     try {
-      await Auth.register(name, email, password, role);
+      await Auth.register(name, email, password, 'driver');
       showMainApp();
       showToast('Account created! Welcome, ' + Auth.getUserName() + '!', 'success');
     } catch (err) {
