@@ -178,8 +178,63 @@ CREATE POLICY "Drivers see own accident reports" ON accident_reports FOR SELECT 
 CREATE POLICY "Drivers create own accident reports" ON accident_reports FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Admins can update accident reports" ON accident_reports FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 
+-- Profiles: admins can view all profiles and delete drivers
+CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+CREATE POLICY "Admins can delete profiles" ON profiles FOR DELETE USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));
+
 -- Schedule Entries
 CREATE POLICY "All users see schedule entries" ON schedule_entries FOR SELECT USING (true);
 CREATE POLICY "Admins create schedule entries" ON schedule_entries FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 CREATE POLICY "Admins update schedule entries" ON schedule_entries FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 CREATE POLICY "Admins delete schedule entries" ON schedule_entries FOR DELETE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- ===== Admin: Create Driver Function =====
+CREATE OR REPLACE FUNCTION create_driver(driver_name TEXT, driver_email TEXT, driver_password TEXT)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  new_user_id UUID;
+BEGIN
+  -- Verify caller is admin
+  IF NOT EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin') THEN
+    RAISE EXCEPTION 'Only admins can create drivers';
+  END IF;
+
+  -- Check if email already exists
+  IF EXISTS (SELECT 1 FROM auth.users WHERE email = driver_email) THEN
+    RAISE EXCEPTION 'A user with this email already exists';
+  END IF;
+
+  -- Generate new UUID
+  new_user_id := gen_random_uuid();
+
+  -- Create auth user
+  INSERT INTO auth.users (
+    id, instance_id, email, encrypted_password, email_confirmed_at,
+    raw_user_meta_data, raw_app_meta_data, role, aud,
+    created_at, updated_at, confirmation_token
+  ) VALUES (
+    new_user_id,
+    '00000000-0000-0000-0000-000000000000',
+    driver_email,
+    crypt(driver_password, gen_salt('bf')),
+    NOW(),
+    jsonb_build_object('name', driver_name, 'role', 'driver'),
+    jsonb_build_object('provider', 'email', 'providers', ARRAY['email']),
+    'authenticated',
+    'authenticated',
+    NOW(),
+    NOW(),
+    ''
+  );
+
+  -- Create profile
+  INSERT INTO profiles (id, name, email, role)
+  VALUES (new_user_id, driver_name, driver_email, 'driver');
+
+  RETURN json_build_object('id', new_user_id, 'name', driver_name, 'email', driver_email);
+END;
+$$;

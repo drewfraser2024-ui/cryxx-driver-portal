@@ -739,6 +739,10 @@
             <p class="subtitle">Review all driver submissions</p>
           </div>
           <div class="admin-stats">
+            <div class="stat-card" style="border-left:3px solid var(--primary)">
+              <div class="stat-number" id="stat-drivers">0</div>
+              <div class="stat-label">Total Drivers</div>
+            </div>
             <div class="stat-card">
               <div class="stat-number" id="stat-vacation">0</div>
               <div class="stat-label">Vacation Requests</div>
@@ -769,6 +773,7 @@
             </div>
           </div>
           <div class="admin-tabs">
+            <button class="admin-tab" data-tab="drivers">&#128100; Drivers</button>
             <button class="admin-tab active" data-tab="vacation">Vacation</button>
             <button class="admin-tab" data-tab="contact">Messages</button>
             <button class="admin-tab" data-tab="payroll">Payroll</button>

@@ -79,6 +79,15 @@ const DB = {
     throw new Error('Database not connected');
   },
 
+  async rpc(fnName, params = {}) {
+    if (supabaseClient) {
+      const { data, error } = await supabaseClient.rpc(fnName, params);
+      if (error) throw error;
+      return data;
+    }
+    throw new Error('Database not connected');
+  },
+
   async count(table, filters = {}) {
     if (supabaseClient) {
       let query = supabaseClient.from(table).select('*', { count: 'exact', head: true });

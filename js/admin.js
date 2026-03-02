@@ -17,7 +17,8 @@ const Admin = {
   async loadDashboard() {
     // Load counts
     try {
-      const [vacCount, contactCount, payrollCount, uniformCount, loadingCount, inspCount, accCount] = await Promise.all([
+      const [driverCount, vacCount, contactCount, payrollCount, uniformCount, loadingCount, inspCount, accCount] = await Promise.all([
+        DB.count('profiles', { role: 'driver' }),
         DB.count('vacation_requests'),
         DB.count('contact_messages'),
         DB.count('payroll_issues'),
@@ -27,6 +28,7 @@ const Admin = {
         DB.count('accident_reports')
       ]);
 
+      document.getElementById('stat-drivers').textContent = driverCount;
       document.getElementById('stat-vacation').textContent = vacCount;
       document.getElementById('stat-contact').textContent = contactCount;
       document.getElementById('stat-payroll').textContent = payrollCount;
@@ -45,6 +47,12 @@ const Admin = {
   async loadTabContent(tab) {
     const container = document.getElementById('admin-content');
     container.innerHTML = '<p class="empty-state">Loading...</p>';
+
+    // Special handling for drivers tab
+    if (tab === 'drivers') {
+      this.loadDriversTab(container);
+      return;
+    }
 
     const tableMap = {
       vacation: 'vacation_requests',
@@ -281,6 +289,96 @@ const Admin = {
 
       default:
         return '';
+    }
+  },
+
+  // ===== Driver Management =====
+  async loadDriversTab(container) {
+    container.innerHTML = `
+      <div style="margin-bottom:1.5rem">
+        <h3 style="margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">&#128100; Add New Driver</h3>
+        <form id="add-driver-form" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0.75rem;align-items:end">
+          <div class="form-group" style="margin:0">
+            <label for="new-driver-name">Full Name</label>
+            <input type="text" id="new-driver-name" placeholder="John Smith" required>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label for="new-driver-email">Email</label>
+            <input type="email" id="new-driver-email" placeholder="john@email.com" required>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label for="new-driver-password">Temp Password</label>
+            <input type="text" id="new-driver-password" placeholder="Min 6 characters" required minlength="6">
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm" style="height:40px;white-space:nowrap">+ Add Driver</button>
+        </form>
+      </div>
+      <h3 style="margin-bottom:0.75rem">All Drivers</h3>
+      <div id="drivers-list"><p class="empty-state">Loading drivers...</p></div>
+    `;
+
+    // Setup form handler
+    document.getElementById('add-driver-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      const name = document.getElementById('new-driver-name').value.trim();
+      const email = document.getElementById('new-driver-email').value.trim();
+      const password = document.getElementById('new-driver-password').value;
+
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+
+      setButtonLoading(btn, true);
+      try {
+        await DB.rpc('create_driver', {
+          driver_name: name,
+          driver_email: email,
+          driver_password: password
+        });
+        showToast(`Driver "${name}" created successfully!`, 'success');
+        e.target.reset();
+        this.loadDriversList();
+        this.loadDashboard();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        setButtonLoading(btn, false);
+      }
+    });
+
+    this.loadDriversList();
+  },
+
+  async loadDriversList() {
+    const listContainer = document.getElementById('drivers-list');
+    if (!listContainer) return;
+    try {
+      const drivers = await DB.select('profiles');
+      if (drivers.length === 0) {
+        listContainer.innerHTML = '<p class="empty-state">No drivers yet</p>';
+        return;
+      }
+      listContainer.innerHTML = drivers.map(d => `
+        <div class="admin-item">
+          <div class="admin-item-header">
+            <h4>${escapeHtml(d.name)}</h4>
+            <span class="meta">${formatDateTime(d.created_at)}</span>
+          </div>
+          <div class="admin-item-body">
+            <p><strong>Email:</strong> ${escapeHtml(d.email)}</p>
+            <p><strong>Role:</strong> <span class="status-badge ${d.role === 'admin' ? 'status-approved' : 'status-pending'}">${capitalize(d.role)}</span></p>
+          </div>
+          ${d.role !== 'admin' ? `
+            <div class="admin-item-actions">
+              <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('profiles', '${d.id}', this)" title="Remove driver">&#128465; Remove</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    } catch (err) {
+      listContainer.innerHTML = '<p class="empty-state">Error loading drivers</p>';
     }
   }
 };
