@@ -2,24 +2,47 @@
 const Auth = {
   currentUser: null,
 
+  buildCurrentUser(user, profile = null) {
+    const fallbackName = user?.user_metadata?.name || user?.email?.split('@')[0] || 'User';
+    const fallbackRole = user?.user_metadata?.role || 'driver';
+    return {
+      id: user?.id || null,
+      email: user?.email || null,
+      name: profile?.name || fallbackName,
+      role: profile?.role || fallbackRole
+    };
+  },
+
+  isProfileMissingError(error) {
+    if (!error) return false;
+    if (error.code === 'PGRST116') return true;
+    const message = String(error.message || '').toLowerCase();
+    return message.includes('no rows');
+  },
+
+  isDuplicateProfileError(error) {
+    if (!error) return false;
+    if (error.code === '23505') return true;
+    const message = String(error.message || '').toLowerCase();
+    return message.includes('duplicate') || message.includes('already exists');
+  },
+
   async init() {
     if (supabaseClient) {
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (session) {
-        const { data: profile } = await supabaseClient
+        const { data: profile, error: profileError } = await supabaseClient
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
           .single();
-        if (profile) {
-          this.currentUser = {
-            id: session.user.id,
-            email: session.user.email,
-            name: profile.name,
-            role: profile.role
-          };
-          return true;
+
+        if (profileError && !this.isProfileMissingError(profileError)) {
+          console.error('Profile lookup failed:', profileError);
         }
+
+        this.currentUser = this.buildCurrentUser(session.user, profile);
+        return true;
       }
     }
     return false;
@@ -29,18 +52,17 @@ const Auth = {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) throw error;
 
-    const { data: profile } = await supabaseClient
+    const { data: profile, error: profileError } = await supabaseClient
       .from('profiles')
       .select('*')
       .eq('id', data.user.id)
       .single();
 
-    this.currentUser = {
-      id: data.user.id,
-      email: data.user.email,
-      name: profile?.name || email.split('@')[0],
-      role: profile?.role || 'driver'
-    };
+    if (profileError && !this.isProfileMissingError(profileError)) {
+      console.error('Profile lookup failed:', profileError);
+    }
+
+    this.currentUser = this.buildCurrentUser(data.user, profile);
     return this.currentUser;
   },
 
@@ -67,14 +89,9 @@ const Auth = {
         email,
         role
       });
-      if (profileError) throw profileError;
+      if (profileError && !this.isDuplicateProfileError(profileError)) throw profileError;
 
-      this.currentUser = {
-        id: data.user.id,
-        email,
-        name,
-        role
-      };
+      this.currentUser = this.buildCurrentUser(data.user, { name, role });
       return this.currentUser;
     } else {
       // Email confirmation required - try to sign in anyway
@@ -91,14 +108,9 @@ const Auth = {
           email,
           role
         });
-        if (profileError && !profileError.message.includes('duplicate')) throw profileError;
+        if (profileError && !this.isDuplicateProfileError(profileError)) throw profileError;
 
-        this.currentUser = {
-          id: signInData.user.id,
-          email,
-          name,
-          role
-        };
+        this.currentUser = this.buildCurrentUser(signInData.user, { name, role });
         return this.currentUser;
       } catch (e) {
         throw e;
