@@ -96,6 +96,18 @@ const Admin = {
       </div>
     `;
 
+    const tableMap = {
+      vacation: 'vacation_requests',
+      contact: 'contact_messages',
+      payroll: 'payroll_issues',
+      uniforms: 'uniform_requests',
+      loading: 'loading_suggestions',
+      inspections: 'trip_inspections',
+      accidents: 'accident_reports'
+    };
+    const tableName = tableMap[tab];
+    const deleteHtml = `<button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('${tableName}', '${item.id}', this)" title="Delete">&#128465; Delete</button>`;
+
     switch (tab) {
       case 'vacation':
         return `
@@ -110,7 +122,13 @@ const Admin = {
               ${item.reason ? `<p><strong>Reason:</strong> ${escapeHtml(item.reason)}</p>` : ''}
               <p>${statusHtml}</p>
             </div>
-            ${item.status === 'pending' ? actionsHtml : ''}
+            <div class="admin-item-actions">
+              ${item.status === 'pending' ? `
+                <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Approve</button>
+                <button class="btn btn-danger btn-sm admin-action-btn" data-id="${item.id}" data-action="denied">Deny</button>
+              ` : ''}
+              ${deleteHtml}
+            </div>
           </div>
         `;
 
@@ -126,11 +144,12 @@ const Admin = {
               <p>${escapeHtml(item.message)}</p>
               <p>${statusHtml}</p>
             </div>
-            ${item.status === 'pending' ? `
-              <div class="admin-item-actions">
+            <div class="admin-item-actions">
+              ${item.status === 'pending' ? `
                 <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Mark Read</button>
-              </div>
-            ` : ''}
+              ` : ''}
+              ${deleteHtml}
+            </div>
           </div>
         `;
 
@@ -147,7 +166,13 @@ const Admin = {
               <p>${escapeHtml(item.details)}</p>
               <p>${statusHtml}</p>
             </div>
-            ${item.status === 'pending' ? actionsHtml : ''}
+            <div class="admin-item-actions">
+              ${item.status === 'pending' ? `
+                <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Approve</button>
+                <button class="btn btn-danger btn-sm admin-action-btn" data-id="${item.id}" data-action="denied">Deny</button>
+              ` : ''}
+              ${deleteHtml}
+            </div>
           </div>
         `;
 
@@ -164,7 +189,13 @@ const Admin = {
               ${item.notes ? `<p><strong>Notes:</strong> ${escapeHtml(item.notes)}</p>` : ''}
               <p>${statusHtml}</p>
             </div>
-            ${item.status === 'pending' ? actionsHtml : ''}
+            <div class="admin-item-actions">
+              ${item.status === 'pending' ? `
+                <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Approve</button>
+                <button class="btn btn-danger btn-sm admin-action-btn" data-id="${item.id}" data-action="denied">Deny</button>
+              ` : ''}
+              ${deleteHtml}
+            </div>
           </div>
         `;
 
@@ -181,11 +212,12 @@ const Admin = {
               <p>${escapeHtml(item.suggestion)}</p>
               <p>${statusHtml}</p>
             </div>
-            ${item.status === 'pending' ? `
-              <div class="admin-item-actions">
+            <div class="admin-item-actions">
+              ${item.status === 'pending' ? `
                 <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Acknowledge</button>
-              </div>
-            ` : ''}
+              ` : ''}
+              ${deleteHtml}
+            </div>
           </div>
         `;
 
@@ -207,7 +239,13 @@ const Admin = {
               ${inspPhotos ? `<div class="photo-grid">${inspPhotos}</div>` : ''}
               <p>${statusHtml}</p>
             </div>
-            ${item.status === 'pending' ? actionsHtml : ''}
+            <div class="admin-item-actions">
+              ${item.status === 'pending' ? `
+                <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Approve</button>
+                <button class="btn btn-danger btn-sm admin-action-btn" data-id="${item.id}" data-action="denied">Deny</button>
+              ` : ''}
+              ${deleteHtml}
+            </div>
           </div>
         `;
 
@@ -231,7 +269,13 @@ const Admin = {
               ${accPhotos ? `<div class="photo-grid">${accPhotos}</div>` : ''}
               <p>${statusHtml}</p>
             </div>
-            ${item.status === 'pending' ? actionsHtml : ''}
+            <div class="admin-item-actions">
+              ${item.status === 'pending' ? `
+                <button class="btn btn-success btn-sm admin-action-btn" data-id="${item.id}" data-action="approved">Approve</button>
+                <button class="btn btn-danger btn-sm admin-action-btn" data-id="${item.id}" data-action="denied">Deny</button>
+              ` : ''}
+              ${deleteHtml}
+            </div>
           </div>
         `;
 

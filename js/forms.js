@@ -56,7 +56,10 @@ const Forms = {
             <p>${item.reason || 'No reason provided'}</p>
             <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)}</p>
           </div>
-          <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+          <div class="history-item-right">
+            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+            <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('vacation_requests', '${item.id}', this)" title="Delete">&#128465;</button>
+          </div>
         </div>
       `).join('');
     } catch (err) {
@@ -109,7 +112,10 @@ const Forms = {
             <p>${escapeHtml(truncate(item.message, 100))}</p>
             <p style="font-size:0.75rem;color:var(--gray-400)">Sent ${formatDateTime(item.created_at)} | Priority: ${capitalize(item.priority)}</p>
           </div>
-          <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+          <div class="history-item-right">
+            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+            <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('contact_messages', '${item.id}', this)" title="Delete">&#128465;</button>
+          </div>
         </div>
       `).join('');
     } catch (err) {
@@ -164,7 +170,10 @@ const Forms = {
             ${item.expected_amount ? `<p style="font-size:0.8rem">Expected: $${item.expected_amount} | Received: $${item.received_amount || 'N/A'}</p>` : ''}
             <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)}</p>
           </div>
-          <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+          <div class="history-item-right">
+            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+            <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('payroll_issues', '${item.id}', this)" title="Delete">&#128465;</button>
+          </div>
         </div>
       `).join('');
     } catch (err) {
@@ -227,7 +236,10 @@ const Forms = {
             ${item.notes ? `<p>${escapeHtml(truncate(item.notes, 80))}</p>` : ''}
             <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)}</p>
           </div>
-          <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+          <div class="history-item-right">
+            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+            <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('uniform_requests', '${item.id}', this)" title="Delete">&#128465;</button>
+          </div>
         </div>
       `).join('');
     } catch (err) {
@@ -280,7 +292,10 @@ const Forms = {
             <p>${escapeHtml(truncate(item.suggestion, 100))}</p>
             <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)} | ${capitalize(item.priority)}</p>
           </div>
-          <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+          <div class="history-item-right">
+            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+            <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('loading_suggestions', '${item.id}', this)" title="Delete">&#128465;</button>
+          </div>
         </div>
       `).join('');
     } catch (err) {
@@ -382,7 +397,10 @@ const Forms = {
               ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
               <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)}</p>
             </div>
-            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+            <div class="history-item-right">
+              <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+              <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('trip_inspections', '${item.id}', this)" title="Delete">&#128465;</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -494,7 +512,10 @@ const Forms = {
               ${photos ? `<div class="photo-grid">${photos}</div>` : ''}
               <p style="font-size:0.75rem;color:var(--gray-400)">Submitted ${formatDateTime(item.created_at)}</p>
             </div>
-            <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+            <div class="history-item-right">
+              <span class="status-badge status-${item.status}">${capitalize(item.status)}</span>
+              <button class="btn btn-danger btn-sm delete-btn" onclick="deleteRecord('accident_reports', '${item.id}', this)" title="Delete">&#128465;</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -616,6 +637,27 @@ function setButtonLoading(btn, loading) {
     btn.classList.add('loading');
   } else {
     btn.classList.remove('loading');
+  }
+}
+
+async function deleteRecord(table, id, btn) {
+  if (!confirm('Are you sure you want to delete this?')) return;
+  try {
+    btn.disabled = true;
+    btn.textContent = '...';
+    await DB.delete(table, id);
+    const historyItem = btn.closest('.history-item') || btn.closest('.admin-item');
+    if (historyItem) {
+      historyItem.style.transition = 'opacity 0.3s, transform 0.3s';
+      historyItem.style.opacity = '0';
+      historyItem.style.transform = 'translateX(20px)';
+      setTimeout(() => historyItem.remove(), 300);
+    }
+    showToast('Deleted successfully', 'success');
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = '\u{1F5D1}';
+    showToast('Error deleting: ' + err.message, 'error');
   }
 }
 
