@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const logoutBtn = document.getElementById('logout-btn');
   const menuToggle = document.getElementById('menu-toggle');
   const sidebar = document.getElementById('sidebar');
+  let modulesInitialized = false;
 
   // Create overlay for mobile
   const overlay = document.createElement('div');
@@ -31,6 +32,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     registerForm.classList.add('hidden');
     loginForm.classList.remove('hidden');
   });
+
+  // ===== Handbook preview on registration =====
+  Handbook.renderContent();
+  const viewHandbookBtn = document.getElementById('reg-view-handbook');
+  const regHandbookContent = document.getElementById('reg-handbook-content');
+  if (viewHandbookBtn && regHandbookContent) {
+    viewHandbookBtn.addEventListener('click', () => {
+      regHandbookContent.classList.toggle('hidden');
+      const open = !regHandbookContent.classList.contains('hidden');
+      viewHandbookBtn.innerHTML = open
+        ? '&#128214; Hide the Employee Handbook'
+        : '&#128214; Read the Employee Handbook';
+    });
+  }
 
   // ===== Login =====
   loginForm.addEventListener('submit', async (e) => {
@@ -62,6 +77,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     setButtonLoading(btn, true);
     try {
       await Auth.register(name, email, password, 'driver');
+      // Record the handbook acknowledgment agreed to during sign-up.
+      try {
+        await Handbook.recordAcknowledgment();
+      } catch (ackErr) {
+        console.error('Handbook acknowledgment failed:', ackErr);
+      }
       showMainApp();
       showToast('Account created! Welcome, ' + Auth.getUserName() + '!', 'success');
     } catch (err) {
@@ -74,6 +95,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ===== Logout =====
   logoutBtn.addEventListener('click', async () => {
     await Auth.logout();
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    registerForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+    loginForm.reset();
+    registerForm.reset();
     mainApp.classList.remove('active');
     authScreen.classList.add('active');
     showToast('Signed out successfully');
@@ -117,10 +144,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Initialize modules
-    Router.init();
-    Forms.init();
-    Admin.init();
-    Schedule.init();
+    if (!modulesInitialized) {
+      Router.init();
+      Forms.init();
+      Admin.init();
+      Schedule.init();
+      Handbook.init();
+      modulesInitialized = true;
+    } else {
+      Forms.reloadAll();
+      Schedule.syncRoleState();
+      Schedule.render();
+      Handbook.init();
+    }
 
     // Dashboard greeting and counts
     Dashboard.updateGreeting();

@@ -1,8 +1,12 @@
 // ===== SPA Router =====
 const Router = {
   currentPage: 'dashboard',
+  initialized: false,
 
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     // Nav link clicks
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', (e) => {
@@ -63,6 +67,9 @@ const Router = {
     if (page === 'dashboard') {
       Dashboard.updateGreeting();
       Dashboard.loadPendingCounts();
+    }
+    if (page === 'handbook') {
+      Handbook.loadStatus();
     }
   }
 };

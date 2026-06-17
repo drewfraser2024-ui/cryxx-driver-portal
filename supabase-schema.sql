@@ -114,6 +114,16 @@ CREATE TABLE accident_reports (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Handbook Acknowledgments (drivers sign the employee handbook)
+CREATE TABLE handbook_acknowledgments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  user_name TEXT NOT NULL,
+  version TEXT NOT NULL DEFAULT '1.0',
+  signed_at TIMESTAMPTZ DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Schedule Entries
 CREATE TABLE schedule_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -135,6 +145,7 @@ ALTER TABLE uniform_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE loading_suggestions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trip_inspections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE accident_reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE handbook_acknowledgments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE schedule_entries ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: users can read own, admins can read all
@@ -177,6 +188,10 @@ CREATE POLICY "Admins can update trip inspections" ON trip_inspections FOR UPDAT
 CREATE POLICY "Drivers see own accident reports" ON accident_reports FOR SELECT USING (auth.uid() = user_id OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
 CREATE POLICY "Drivers create own accident reports" ON accident_reports FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Admins can update accident reports" ON accident_reports FOR UPDATE USING (EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+
+-- Handbook Acknowledgments (drivers see/sign own, admins see all)
+CREATE POLICY "Drivers see own handbook acknowledgments" ON handbook_acknowledgments FOR SELECT USING (auth.uid() = user_id OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Drivers create own handbook acknowledgments" ON handbook_acknowledgments FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Profiles: admins can view all profiles and delete drivers
 CREATE POLICY "Admins can view all profiles" ON profiles FOR SELECT USING (EXISTS (SELECT 1 FROM profiles p WHERE p.id = auth.uid() AND p.role = 'admin'));

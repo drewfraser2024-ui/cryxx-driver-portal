@@ -1431,3 +1431,99 @@ body {
 .admin-photo:hover {
   transform: scale(1.05);
 }
+
+/* ===== Employee Handbook ===== */
+.handbook-content,
+.handbook-doc {
+  color: var(--gray-700);
+  line-height: 1.6;
+}
+
+.handbook-doc .handbook-intro {
+  margin-bottom: 1.25rem;
+}
+
+.handbook-doc h3 {
+  color: var(--primary);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.handbook-doc ul {
+  margin: 0.5rem 0 0.5rem 1.25rem;
+  padding-left: 0.75rem;
+}
+
+.handbook-doc li {
+  margin-bottom: 0.35rem;
+}
+
+.handbook-doc p {
+  margin-bottom: 0.65rem;
+}
+
+/* Registration handbook acknowledgment */
+.handbook-ack {
+  border-top: 1px solid var(--gray-200);
+  padding-top: 1rem;
+}
+
+.handbook-toggle {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 0.75rem;
+}
+
+.handbook-toggle:hover {
+  text-decoration: underline;
+}
+
+.handbook-preview {
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.handbook-agree-label {
+  font-size: 0.9rem;
+}
+
+/* Signature status banners */
+.handbook-signed,
+.handbook-unsigned {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.handbook-signed p,
+.handbook-unsigned p {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--gray-500);
+}
+
+.handbook-check,
+.handbook-warn {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.handbook-check {
+  color: var(--success, #16a34a);
+}
+
+.handbook-warn {
+  color: var(--warning, #d97706);
+}

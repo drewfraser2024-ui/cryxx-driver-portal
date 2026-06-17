@@ -1,6 +1,11 @@
 // ===== Form Handlers =====
 const Forms = {
+  initialized: false,
+
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     this.setupVacationForm();
     this.setupContactForm();
     this.setupPayrollForm();
@@ -308,28 +313,7 @@ const Forms = {
     const form = document.getElementById('inspection-form');
     const photoInput = document.getElementById('insp-photos');
     const previewContainer = document.getElementById('insp-preview');
-
-    // Photo preview on file select
-    photoInput.addEventListener('change', () => {
-      previewContainer.innerHTML = '';
-      Array.from(photoInput.files).forEach((file, i) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const div = document.createElement('div');
-          div.className = 'photo-preview-item';
-          div.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="photo-remove-btn" data-index="${i}">&times;</button>`;
-          previewContainer.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    // Remove photo preview (note: can't modify FileList, just hides preview)
-    previewContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('photo-remove-btn')) {
-        e.target.closest('.photo-preview-item').remove();
-      }
-    });
+    const photoManager = createPhotoManager(photoInput, previewContainer);
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -338,7 +322,7 @@ const Forms = {
       try {
         // Upload photos
         const photoUrls = [];
-        const files = photoInput.files;
+        const files = photoManager.getFiles();
         for (let i = 0; i < files.length; i++) {
           const url = await uploadPhoto(files[i]);
           photoUrls.push(url);
@@ -362,7 +346,7 @@ const Forms = {
         });
 
         form.reset();
-        previewContainer.innerHTML = '';
+        photoManager.reset();
         showFormSuccess(form, 'Inspection submitted!');
         showToast('Trip inspection submitted!', 'success');
         this.loadInspectionHistory();
@@ -416,31 +400,11 @@ const Forms = {
     const previewContainer = document.getElementById('acc-preview');
     const injuriesCheckbox = document.getElementById('acc-injuries');
     const injuriesDetailGroup = document.getElementById('acc-injuries-detail-group');
+    const photoManager = createPhotoManager(photoInput, previewContainer);
 
     // Toggle injuries detail
     injuriesCheckbox.addEventListener('change', () => {
       injuriesDetailGroup.classList.toggle('hidden', !injuriesCheckbox.checked);
-    });
-
-    // Photo preview on file select
-    photoInput.addEventListener('change', () => {
-      previewContainer.innerHTML = '';
-      Array.from(photoInput.files).forEach((file, i) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const div = document.createElement('div');
-          div.className = 'photo-preview-item';
-          div.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="photo-remove-btn" data-index="${i}">&times;</button>`;
-          previewContainer.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-
-    previewContainer.addEventListener('click', (e) => {
-      if (e.target.classList.contains('photo-remove-btn')) {
-        e.target.closest('.photo-preview-item').remove();
-      }
     });
 
     form.addEventListener('submit', async (e) => {
@@ -450,7 +414,7 @@ const Forms = {
       try {
         // Upload photos
         const photoUrls = [];
-        const files = photoInput.files;
+        const files = photoManager.getFiles();
         for (let i = 0; i < files.length; i++) {
           const url = await uploadPhoto(files[i]);
           photoUrls.push(url);
@@ -476,7 +440,7 @@ const Forms = {
         });
 
         form.reset();
-        previewContainer.innerHTML = '';
+        photoManager.reset();
         injuriesDetailGroup.classList.add('hidden');
         showFormSuccess(form, 'Report submitted!');
         showToast('Accident report submitted!', 'success');
@@ -612,6 +576,64 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+function createPhotoManager(photoInput, previewContainer) {
+  let selectedFiles = [];
+
+  const syncInputFiles = () => {
+    try {
+      const dt = new DataTransfer();
+      selectedFiles.forEach(file => dt.items.add(file));
+      photoInput.files = dt.files;
+    } catch (err) {
+      // Some browsers restrict assigning FileList; selectedFiles still controls uploads.
+    }
+  };
+
+  const renderPreview = () => {
+    previewContainer.innerHTML = '';
+    selectedFiles.forEach((file, i) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const div = document.createElement('div');
+        div.className = 'photo-preview-item';
+        div.innerHTML = `<img src="${e.target.result}" alt="Preview"><button type="button" class="photo-remove-btn" data-index="${i}">&times;</button>`;
+        previewContainer.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  photoInput.addEventListener('change', () => {
+    selectedFiles = Array.from(photoInput.files);
+    renderPreview();
+  });
+
+  previewContainer.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.photo-remove-btn');
+    if (!removeBtn) return;
+
+    const index = Number(removeBtn.dataset.index);
+    if (!Number.isInteger(index) || index < 0 || index >= selectedFiles.length) return;
+
+    selectedFiles.splice(index, 1);
+    syncInputFiles();
+    renderPreview();
+  });
+
+  return {
+    getFiles() {
+      return [...selectedFiles];
+    },
+
+    reset() {
+      selectedFiles = [];
+      photoInput.value = '';
+      previewContainer.innerHTML = '';
+      syncInputFiles();
+    }
+  };
+}
+
 function showToast(message, type = '') {
   const toast = document.getElementById('toast');
   const msg = document.getElementById('toast-message');
@@ -642,21 +664,32 @@ function setButtonLoading(btn, loading) {
 
 async function deleteRecord(table, id, btn) {
   if (!confirm('Are you sure you want to delete this?')) return;
+  const originalText = btn.textContent;
   try {
     btn.disabled = true;
     btn.textContent = '...';
     await DB.delete(table, id);
-    const historyItem = btn.closest('.history-item') || btn.closest('.admin-item');
-    if (historyItem) {
-      historyItem.style.transition = 'opacity 0.3s, transform 0.3s';
-      historyItem.style.opacity = '0';
-      historyItem.style.transform = 'translateX(20px)';
-      setTimeout(() => historyItem.remove(), 300);
+
+    if (table === 'schedule_entries') {
+      await Schedule.render();
+      showToast('Deleted successfully', 'success');
+      return;
+    }
+
+    const rowItem = btn.closest('.history-item') || btn.closest('.admin-item') || btn.closest('.schedule-entry');
+    if (rowItem) {
+      rowItem.style.transition = 'opacity 0.3s, transform 0.3s';
+      rowItem.style.opacity = '0';
+      rowItem.style.transform = 'translateX(20px)';
+      setTimeout(() => rowItem.remove(), 300);
+    } else {
+      btn.disabled = false;
+      btn.textContent = originalText;
     }
     showToast('Deleted successfully', 'success');
   } catch (err) {
     btn.disabled = false;
-    btn.textContent = '\u{1F5D1}';
+    btn.textContent = originalText;
     showToast('Error deleting: ' + err.message, 'error');
   }
 }

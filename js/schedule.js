@@ -1,8 +1,18 @@
 // ===== Schedule Module =====
 const Schedule = {
   currentWeekStart: null,
+  initialized: false,
+  scheduleFormBound: false,
 
   init() {
+    // Keep role-based controls in sync on every login.
+    if (this.initialized) {
+      this.syncRoleState();
+      return;
+    }
+
+    this.initialized = true;
+
     // Set current week (Monday start)
     const today = new Date();
     const day = today.getDay();
@@ -11,44 +21,76 @@ const Schedule = {
     this.currentWeekStart.setHours(0, 0, 0, 0);
 
     // Navigation
-    document.getElementById('schedule-prev').addEventListener('click', () => {
-      this.currentWeekStart.setDate(this.currentWeekStart.getDate() - 7);
-      this.render();
-    });
-
-    document.getElementById('schedule-next').addEventListener('click', () => {
-      this.currentWeekStart.setDate(this.currentWeekStart.getDate() + 7);
-      this.render();
-    });
-
-    // Admin schedule form
-    if (Auth.isAdmin()) {
-      document.getElementById('admin-schedule-controls').classList.remove('hidden');
-      this.loadDriverList();
-
-      document.getElementById('schedule-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        try {
-          await DB.insert('schedule_entries', {
-            driver_id: document.getElementById('sched-driver').value,
-            driver_name: document.getElementById('sched-driver').selectedOptions[0].text,
-            date: document.getElementById('sched-date').value,
-            start_time: document.getElementById('sched-start').value,
-            end_time: document.getElementById('sched-end').value,
-            route: document.getElementById('sched-route').value
-          });
-          document.getElementById('schedule-form').reset();
-          showToast('Schedule entry added!', 'success');
-          this.render();
-        } catch (err) {
-          showToast('Error: ' + err.message, 'error');
-        }
+    const prevBtn = document.getElementById('schedule-prev');
+    const nextBtn = document.getElementById('schedule-next');
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        this.currentWeekStart.setDate(this.currentWeekStart.getDate() - 7);
+        this.render();
       });
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        this.currentWeekStart.setDate(this.currentWeekStart.getDate() + 7);
+        this.render();
+      });
+    }
+
+    this.bindScheduleForm();
+    this.syncRoleState();
+  },
+
+  bindScheduleForm() {
+    if (this.scheduleFormBound) return;
+    const form = document.getElementById('schedule-form');
+    if (!form) return;
+
+    this.scheduleFormBound = true;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!Auth.isAdmin()) return;
+
+      try {
+        const driverSelect = document.getElementById('sched-driver');
+        if (!driverSelect || !driverSelect.value) {
+          showToast('Please select a driver', 'error');
+          return;
+        }
+
+        await DB.insert('schedule_entries', {
+          driver_id: driverSelect.value,
+          driver_name: driverSelect.selectedOptions[0].text,
+          date: document.getElementById('sched-date').value,
+          start_time: document.getElementById('sched-start').value,
+          end_time: document.getElementById('sched-end').value,
+          route: document.getElementById('sched-route').value
+        });
+        form.reset();
+        showToast('Schedule entry added!', 'success');
+        this.render();
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+    });
+  },
+
+  syncRoleState() {
+    const controls = document.getElementById('admin-schedule-controls');
+    if (!controls) return;
+
+    if (Auth.isAdmin()) {
+      controls.classList.remove('hidden');
+      this.loadDriverList();
+    } else {
+      controls.classList.add('hidden');
     }
   },
 
   async loadDriverList() {
     const select = document.getElementById('sched-driver');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Select driver...</option>';
     try {
       const drivers = await DB.select('profiles', { role: 'driver' });
       drivers.forEach(d => {

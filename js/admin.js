@@ -1,8 +1,12 @@
 // ===== Admin Dashboard Module =====
 const Admin = {
   currentTab: 'vacation',
+  initialized: false,
 
   init() {
+    if (this.initialized) return;
+    this.initialized = true;
+
     // Tab switching
     document.querySelectorAll('.admin-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -17,7 +21,7 @@ const Admin = {
   async loadDashboard() {
     // Load counts
     try {
-      const [driverCount, vacCount, contactCount, payrollCount, uniformCount, loadingCount, inspCount, accCount] = await Promise.all([
+      const [driverCount, vacCount, contactCount, payrollCount, uniformCount, loadingCount, inspCount, accCount, handbookCount] = await Promise.all([
         DB.count('profiles', { role: 'driver' }),
         DB.count('vacation_requests'),
         DB.count('contact_messages'),
@@ -25,7 +29,8 @@ const Admin = {
         DB.count('uniform_requests'),
         DB.count('loading_suggestions'),
         DB.count('trip_inspections'),
-        DB.count('accident_reports')
+        DB.count('accident_reports'),
+        DB.count('handbook_acknowledgments')
       ]);
 
       document.getElementById('stat-drivers').textContent = driverCount;
@@ -36,6 +41,7 @@ const Admin = {
       document.getElementById('stat-loading').textContent = loadingCount;
       document.getElementById('stat-inspections').textContent = inspCount;
       document.getElementById('stat-accidents').textContent = accCount;
+      document.getElementById('stat-handbook').textContent = handbookCount;
     } catch (err) {
       console.error('Error loading admin stats:', err);
     }
@@ -51,6 +57,12 @@ const Admin = {
     // Special handling for drivers tab
     if (tab === 'drivers') {
       this.loadDriversTab(container);
+      return;
+    }
+
+    // Read-only handbook acknowledgments tab
+    if (tab === 'handbook') {
+      this.loadHandbookTab(container);
       return;
     }
 
@@ -349,6 +361,64 @@ const Admin = {
     });
 
     this.loadDriversList();
+  },
+
+  // ===== Handbook Acknowledgments (read-only) =====
+  async loadHandbookTab(container) {
+    try {
+      const [acks, profiles] = await Promise.all([
+        DB.select('handbook_acknowledgments'),
+        DB.select('profiles')
+      ]);
+      const drivers = profiles.filter(p => p.role === 'driver');
+
+      // acks come back newest-first; keep the most recent per user
+      const ackByUser = {};
+      acks.forEach(a => {
+        if (!ackByUser[a.user_id]) ackByUser[a.user_id] = a;
+      });
+
+      const signed = drivers.filter(d => ackByUser[d.id]);
+      const unsigned = drivers.filter(d => !ackByUser[d.id]);
+
+      const signedHtml = signed.length ? signed.map(d => {
+        const a = ackByUser[d.id];
+        return `
+          <div class="admin-item">
+            <div class="admin-item-header">
+              <h4>${escapeHtml(d.name)}</h4>
+              <span class="meta">${formatDateTime(a.signed_at || a.created_at)}</span>
+            </div>
+            <div class="admin-item-body">
+              <p><strong>Email:</strong> ${escapeHtml(d.email)}</p>
+              <p><span class="status-badge status-approved">&#10003; Signed</span> <span class="meta">v${escapeHtml(a.version || '1.0')}</span></p>
+            </div>
+          </div>
+        `;
+      }).join('') : '<p class="empty-state">No drivers have signed yet</p>';
+
+      const unsignedHtml = unsigned.length ? unsigned.map(d => `
+        <div class="admin-item">
+          <div class="admin-item-header">
+            <h4>${escapeHtml(d.name)}</h4>
+            <span class="meta">${formatDateTime(d.created_at)}</span>
+          </div>
+          <div class="admin-item-body">
+            <p><strong>Email:</strong> ${escapeHtml(d.email)}</p>
+            <p><span class="status-badge status-denied">&#9888; Not signed</span></p>
+          </div>
+        </div>
+      `).join('') : '';
+
+      container.innerHTML = `
+        <p class="meta" style="margin-bottom:1rem">${signed.length} of ${drivers.length} drivers have signed the handbook.</p>
+        <h3 style="margin-bottom:0.75rem">Signed</h3>
+        ${signedHtml}
+        ${unsigned.length ? `<h3 style="margin:1.5rem 0 0.75rem">Not Yet Signed</h3>${unsignedHtml}` : ''}
+      `;
+    } catch (err) {
+      container.innerHTML = '<p class="empty-state">Error loading handbook acknowledgments</p>';
+    }
   },
 
   async loadDriversList() {

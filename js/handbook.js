@@ -1,0 +1,168 @@
+// ===== Employee Handbook Module =====
+const Handbook = {
+  initialized: false,
+
+  // Bump this when the handbook text changes so drivers can be asked to re-sign.
+  VERSION: '1.0',
+
+  // Single source of truth for the handbook body (used on the auth screen and the handbook page).
+  contentHTML() {
+    return `
+      <div class="handbook-doc">
+        <p class="handbook-intro">Welcome to <strong>CRYXX Solutions and Associates Inc.</strong> This handbook
+        outlines the standards, expectations, and policies that every driver agrees to follow. Please read it
+        carefully &mdash; by signing, you confirm that you understand and agree to abide by these terms.</p>
+
+        <h3>1. Code of Conduct</h3>
+        <p>All drivers represent CRYXX Solutions on the road and with customers. You are expected to act
+        professionally, honestly, and respectfully at all times. Harassment, discrimination, theft, dishonesty,
+        or any unlawful behavior will not be tolerated and may result in immediate termination.</p>
+
+        <h3>2. Safety &amp; Compliance</h3>
+        <ul>
+          <li>Obey all federal, state, and local traffic laws at all times.</li>
+          <li>Always wear your seat belt and require passengers to do the same.</li>
+          <li>No use of handheld mobile devices while operating a vehicle.</li>
+          <li>Complete required pre-trip and post-trip inspections before and after every route.</li>
+          <li>Report any unsafe vehicle condition immediately and do not operate an unsafe vehicle.</li>
+        </ul>
+
+        <h3>3. Hours of Service</h3>
+        <p>Drivers must comply with all applicable Hours of Service (HOS) regulations. Accurate logging of
+        driving time, breaks, and rest periods is mandatory. Falsifying logs is grounds for termination.</p>
+
+        <h3>4. Drug &amp; Alcohol Policy</h3>
+        <p>CRYXX Solutions maintains a strict zero-tolerance policy. Operating a company vehicle under the
+        influence of alcohol, illegal drugs, or any impairing substance is strictly prohibited. Drivers are
+        subject to pre-employment, random, and post-incident testing as permitted by law.</p>
+
+        <h3>5. Vehicle Care &amp; Loading</h3>
+        <p>You are responsible for the cleanliness, fuel level, and general care of your assigned vehicle.
+        Loads must be secured and distributed safely. Report mechanical issues, damage, or accidents promptly
+        through the appropriate sections of this portal.</p>
+
+        <h3>6. Uniform &amp; Appearance</h3>
+        <p>Drivers must wear the approved CRYXX uniform and maintain a clean, professional appearance while on
+        duty. Uniform items can be requested through the Uniform Request section of this portal.</p>
+
+        <h3>7. Attendance &amp; Time Off</h3>
+        <p>Reliable attendance is essential. Time-off and vacation requests must be submitted in advance through
+        the Days Off / Vacation section. Repeated unexcused absences or no-call/no-shows may lead to disciplinary
+        action.</p>
+
+        <h3>8. Reporting Procedures</h3>
+        <p>Accidents, injuries, safety concerns, payroll discrepancies, and other issues must be reported
+        promptly using the relevant sections of this portal. Honest and timely reporting protects you, your
+        coworkers, and the company.</p>
+
+        <h3>9. Acknowledgment</h3>
+        <p>By signing this handbook, you acknowledge that you have read, understood, and agree to comply with all
+        policies described above. You understand that this handbook may be updated and that continued employment
+        is contingent on adherence to current policies. This handbook is not an employment contract and does not
+        guarantee employment for any specific period.</p>
+      </div>
+    `;
+  },
+
+  init() {
+    this.renderContent();
+    if (this.initialized) {
+      this.loadStatus();
+      return;
+    }
+    this.initialized = true;
+
+    const signBtn = document.getElementById('handbook-sign-btn');
+    const agreeCheckbox = document.getElementById('handbook-agree');
+    if (signBtn && agreeCheckbox) {
+      agreeCheckbox.addEventListener('change', () => {
+        signBtn.disabled = !agreeCheckbox.checked;
+      });
+      signBtn.addEventListener('click', async () => {
+        if (!agreeCheckbox.checked) return;
+        setButtonLoading(signBtn, true);
+        signBtn.disabled = true;
+        try {
+          await this.recordAcknowledgment();
+          showToast('Handbook signed. Thank you!', 'success');
+          await this.loadStatus();
+        } catch (err) {
+          showToast('Error: ' + err.message, 'error');
+          signBtn.disabled = false;
+        } finally {
+          setButtonLoading(signBtn, false);
+        }
+      });
+    }
+
+    this.loadStatus();
+  },
+
+  // Inject the handbook body into the page and the registration preview.
+  renderContent() {
+    const html = this.contentHTML();
+    const pageEl = document.getElementById('handbook-content');
+    if (pageEl) pageEl.innerHTML = html;
+    const regEl = document.getElementById('reg-handbook-content');
+    if (regEl && !regEl.dataset.rendered) {
+      regEl.innerHTML = html;
+      regEl.dataset.rendered = 'true';
+    }
+  },
+
+  // Record that the current user has signed the handbook (idempotent-ish; ignores duplicates).
+  async recordAcknowledgment() {
+    return DB.insert('handbook_acknowledgments', {
+      user_id: Auth.getUserId(),
+      user_name: Auth.getUserName(),
+      version: this.VERSION
+    });
+  },
+
+  // Show whether the current user has already signed; otherwise show the sign-now prompt.
+  async loadStatus() {
+    const statusEl = document.getElementById('handbook-status');
+    const signCard = document.getElementById('handbook-sign-card');
+    if (!statusEl) return;
+
+    try {
+      const records = await DB.select('handbook_acknowledgments', { user_id: Auth.getUserId() });
+      const signed = records.find(r => r.version === this.VERSION) || records[0];
+
+      if (signed) {
+        statusEl.innerHTML = `
+          <div class="handbook-signed">
+            <span class="handbook-check">&#10003;</span>
+            <div>
+              <strong>Signed</strong>
+              <p>Acknowledged by ${escapeHtml(signed.user_name)} on ${formatDateTime(signed.signed_at || signed.created_at)} (v${escapeHtml(signed.version || this.VERSION)})</p>
+            </div>
+          </div>
+        `;
+        statusEl.classList.remove('hidden');
+        if (signCard) signCard.classList.add('hidden');
+      } else {
+        statusEl.innerHTML = `
+          <div class="handbook-unsigned">
+            <span class="handbook-warn">&#9888;</span>
+            <div>
+              <strong>Not yet signed</strong>
+              <p>Please review the handbook below and sign to confirm your agreement.</p>
+            </div>
+          </div>
+        `;
+        statusEl.classList.remove('hidden');
+        if (signCard) {
+          signCard.classList.remove('hidden');
+          const agreeCheckbox = document.getElementById('handbook-agree');
+          const signBtn = document.getElementById('handbook-sign-btn');
+          if (agreeCheckbox) agreeCheckbox.checked = false;
+          if (signBtn) signBtn.disabled = true;
+        }
+      }
+    } catch (err) {
+      statusEl.innerHTML = '<div class="empty-state">Unable to load signature status</div>';
+      statusEl.classList.remove('hidden');
+    }
+  }
+};
