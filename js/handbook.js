@@ -3,7 +3,7 @@ const Handbook = {
   initialized: false,
 
   // Bump this when the handbook text changes so drivers can be asked to re-sign.
-  VERSION: '1.1',
+  VERSION: '1.2',
 
   // Single source of truth for the handbook body (used on the auth screen and the handbook page).
   contentHTML() {
@@ -49,8 +49,16 @@ const Handbook = {
 
         <h3>7. Attendance, Time Off &amp; Paid Leave</h3>
         <p>Reliable attendance is essential. Time-off and vacation requests must be submitted in advance through
-        the Days Off / Vacation section. Repeated unexcused absences or no-call/no-shows may lead to disciplinary
-        action.</p>
+        the Days Off / Vacation section.</p>
+        <p>A &ldquo;no-call/no-show&rdquo; occurs when an employee fails to report for a scheduled shift without
+        notifying management in advance. No-call/no-show incidents are subject to the following progressive
+        disciplinary action:</p>
+        <ul>
+          <li><strong>First occurrence:</strong> verbal warning.</li>
+          <li><strong>Second occurrence:</strong> one (1) day suspension.</li>
+          <li><strong>Third occurrence:</strong> three (3) day suspension.</li>
+          <li><strong>Fourth occurrence:</strong> termination of employment.</li>
+        </ul>
         <p>Paid leave is provided on an annual basis as follows:</p>
         <ul>
           <li><strong>Drivers</strong> receive five (5) paid sick days and two (2) personal days per year.</li>
