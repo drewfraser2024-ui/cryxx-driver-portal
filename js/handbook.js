@@ -3,7 +3,7 @@ const Handbook = {
   initialized: false,
 
   // Bump this when the handbook text changes so drivers can be asked to re-sign.
-  VERSION: '1.4',
+  VERSION: '1.5',
 
   // Single source of truth for the handbook body (used on the auth screen and the handbook page).
   contentHTML() {
@@ -43,8 +43,8 @@ const Handbook = {
 
         <h3>6. Uniform &amp; Appearance</h3>
         <p>Drivers must wear the approved CRYXX uniform and maintain a clean, professional appearance while on
-        duty. Upon starting employment, every employee is issued an initial uniform allotment of four (4) pairs
-        of pants or shorts and four (4) shirts at no cost. Additional or replacement items can be requested
+        duty. Upon starting employment, every employee is issued an initial uniform allotment of three (3) pairs
+        of pants or shorts and three (3) shirts at no cost. Additional or replacement items can be requested
         through the Uniform Request section of this portal.</p>
 
         <h3>7. Attendance, Time Off &amp; Paid Leave</h3>
