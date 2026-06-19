@@ -3,7 +3,7 @@ const Handbook = {
   initialized: false,
 
   // Bump this when the handbook text changes so drivers can be asked to re-sign.
-  VERSION: '1.3',
+  VERSION: '1.4',
 
   // Single source of truth for the handbook body (used on the auth screen and the handbook page).
   contentHTML() {
@@ -78,7 +78,7 @@ const Handbook = {
         <ul>
           <li><strong>Six-day work weeks are mandatory.</strong> You will be scheduled to work six (6) days each
           week throughout peak.</li>
-          <li><strong>Report to work on time</strong>, between 6:00 a.m. and 7:30 a.m. on your scheduled days.</li>
+          <li><strong>Report to work on time</strong>, between 7:00 a.m. and 8:00 a.m. (tentative) on your scheduled days.</li>
           <li><strong>Extended hours of service.</strong> Routes will run later into the evening. As this period
           falls in winter, team members should expect to complete deliveries after dark.</li>
           <li><strong>No time off will be approved during peak season.</strong> Due to extremely high volumes and
