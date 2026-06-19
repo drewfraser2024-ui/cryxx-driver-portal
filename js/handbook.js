@@ -3,7 +3,7 @@ const Handbook = {
   initialized: false,
 
   // Bump this when the handbook text changes so drivers can be asked to re-sign.
-  VERSION: '1.2',
+  VERSION: '1.3',
 
   // Single source of truth for the handbook body (used on the auth screen and the handbook page).
   contentHTML() {
@@ -67,18 +67,40 @@ const Handbook = {
           become eligible for one (1) week of paid vacation, compensated at a flat rate of $350&ndash;$500.</li>
         </ul>
 
-        <h3>8. Resignation &amp; Final Pay</h3>
+        <h3>8. Peak Season</h3>
+        <p>Several weeks throughout the year are designated as &ldquo;peak&rdquo; periods. A peak period is any
+        time of predicted high delivery volume. Our primary peak season extends from the Friday after
+        Thanksgiving (&ldquo;Cyber Monday&rdquo; weekend) through the second Saturday in January; this end date
+        may flex depending on volume forecasts. Team members will be notified well in advance of peak scheduling
+        and are expected to report to work on all designated days. Team members are compensated accordingly for
+        the additional days worked during peak.</p>
+        <p>During peak season, all team members are required to observe the following:</p>
+        <ul>
+          <li><strong>Six-day work weeks are mandatory.</strong> You will be scheduled to work six (6) days each
+          week throughout peak.</li>
+          <li><strong>Report to work on time</strong>, between 6:00 a.m. and 7:30 a.m. on your scheduled days.</li>
+          <li><strong>Extended hours of service.</strong> Routes will run later into the evening. As this period
+          falls in winter, team members should expect to complete deliveries after dark.</li>
+          <li><strong>No time off will be approved during peak season.</strong> Due to extremely high volumes and
+          our customers' reliance on your commitment, no time-off requests will be granted during November or
+          December. Taking unauthorized time off during peak may result in termination.</li>
+          <li><strong>Seasonal status.</strong> During peak, all team members work as seasonal employees.
+          Following the season, managers will hold a performance discussion with each team member in the new year
+          to determine eligibility for full-time employment based on performance.</li>
+        </ul>
+
+        <h3>9. Resignation &amp; Final Pay</h3>
         <p>Employees who intend to leave the company must submit written notice of resignation at least two (2)
         weeks in advance. Failure to provide the required two weeks' notice will result in forfeiture of your
         final paycheck, to the extent permitted by applicable law.</p>
 
-        <h3>9. Reporting Procedures</h3>
+        <h3>10. Reporting Procedures</h3>
         <p>Accidents, injuries, safety concerns, payroll discrepancies, and other issues must be reported
         promptly using the relevant sections of this portal. All workplace injuries must be reported no later
         than twenty-four (24) hours after the incident occurs. Honest and timely reporting protects you, your
         coworkers, and the company.</p>
 
-        <h3>10. Acknowledgment</h3>
+        <h3>11. Acknowledgment</h3>
         <p>By signing this handbook, you acknowledge that you have read, understood, and agree to comply with all
         policies described above. You understand that this handbook may be updated and that continued employment
         is contingent on adherence to current policies. This handbook is not an employment contract and does not
