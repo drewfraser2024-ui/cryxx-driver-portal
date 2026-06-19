@@ -3,7 +3,7 @@ const Handbook = {
   initialized: false,
 
   // Bump this when the handbook text changes so drivers can be asked to re-sign.
-  VERSION: '1.0',
+  VERSION: '1.1',
 
   // Single source of truth for the handbook body (used on the auth screen and the handbook page).
   contentHTML() {
@@ -43,19 +43,34 @@ const Handbook = {
 
         <h3>6. Uniform &amp; Appearance</h3>
         <p>Drivers must wear the approved CRYXX uniform and maintain a clean, professional appearance while on
-        duty. Uniform items can be requested through the Uniform Request section of this portal.</p>
+        duty. Upon starting employment, every employee is issued an initial uniform allotment of four (4) pairs
+        of pants or shorts and four (4) shirts at no cost. Additional or replacement items can be requested
+        through the Uniform Request section of this portal.</p>
 
-        <h3>7. Attendance &amp; Time Off</h3>
+        <h3>7. Attendance, Time Off &amp; Paid Leave</h3>
         <p>Reliable attendance is essential. Time-off and vacation requests must be submitted in advance through
         the Days Off / Vacation section. Repeated unexcused absences or no-call/no-shows may lead to disciplinary
         action.</p>
+        <p>Paid leave is provided on an annual basis as follows:</p>
+        <ul>
+          <li><strong>Drivers</strong> receive five (5) paid sick days and two (2) personal days per year.</li>
+          <li><strong>Managers</strong> receive seven (7) paid sick days and seven (7) personal days per year.</li>
+          <li><strong>Paid vacation:</strong> after completing two (2) years of continuous service, employees
+          become eligible for one (1) week of paid vacation, compensated at a flat rate of $350&ndash;$500.</li>
+        </ul>
 
-        <h3>8. Reporting Procedures</h3>
+        <h3>8. Resignation &amp; Final Pay</h3>
+        <p>Employees who intend to leave the company must submit written notice of resignation at least two (2)
+        weeks in advance. Failure to provide the required two weeks' notice will result in forfeiture of your
+        final paycheck, to the extent permitted by applicable law.</p>
+
+        <h3>9. Reporting Procedures</h3>
         <p>Accidents, injuries, safety concerns, payroll discrepancies, and other issues must be reported
-        promptly using the relevant sections of this portal. Honest and timely reporting protects you, your
+        promptly using the relevant sections of this portal. All workplace injuries must be reported no later
+        than twenty-four (24) hours after the incident occurs. Honest and timely reporting protects you, your
         coworkers, and the company.</p>
 
-        <h3>9. Acknowledgment</h3>
+        <h3>10. Acknowledgment</h3>
         <p>By signing this handbook, you acknowledge that you have read, understood, and agree to comply with all
         policies described above. You understand that this handbook may be updated and that continued employment
         is contingent on adherence to current policies. This handbook is not an employment contract and does not
